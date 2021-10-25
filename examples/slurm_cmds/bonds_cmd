@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-socket=2
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:4
+#SBATCH --time=02:00:00
+#SBATCH --error=job.err
+#SBATCH --output=job.out
+#SBATCH --account=IscrB_HiMicro
+#SBATCH --job-name=bonds
+#SBATCH --partition=m100_usr_prod
+#SBATCH --qos=m100_qos_dbg
+
+module purge
+module load profile/chem-phys
+module load python/3.8.2
+module load autoload qe/6.7
+
+export OMP_NUM_THREADS=8
+
+PW_BIN='pw.x'
+PP_BIN='pp.x'
+
+python3 bonds.py
+
+cd bonds/atoms_0
+
+mpirun $PP_BIN < pp.inp > pp.out
+
+cd ../atoms_1
+
+mpirun $PW_BIN < pw.inp > pw.out
+mpirun $PP_BIN < pp.inp > pp.out
+
+cd ../atoms_2
+
+mpirun $PW_BIN < pw.inp > pw.out
+mpirun $PP_BIN < pp.inp > pp.out
+
+cd ..
+
+mpirun $PP_BIN < pp.inp > pp.out
+
+cd ..

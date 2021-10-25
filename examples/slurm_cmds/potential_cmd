@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-socket=2
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:4
+#SBATCH --time=02:00:00
+#SBATCH --error=job.err
+#SBATCH --output=job.out
+#SBATCH --account=IscrB_HiMicro
+#SBATCH --job-name=vib
+#SBATCH --partition=m100_usr_prod
+#SBATCH --qos=m100_qos_dbg
+
+module purge
+module load profile/chem-phys
+module load python/3.8.2
+module load autoload qe-gpu/6.7
+
+export OMP_NUM_THREADS=8
+
+QE_BIN='pp.x'
+AVE_BIN='average.x'
+
+python3 potential.py -c True -w True -r False -p False
+
+cd potential
+
+mpirun $QE_BIN  < pp.inp > pp.out
+
+$AVE_BIN < ave.inp > ave.out
+
+cd ..
+
+python3 potential.py -c True -w False -r False -p True

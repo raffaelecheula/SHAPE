@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-socket=2
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:4
+#SBATCH --time=02:00:00
+#SBATCH --error=job.err
+#SBATCH --output=job.out
+#SBATCH --account=IscrB_HiMicro
+#SBATCH --job-name=pw
+#SBATCH --partition=m100_usr_prod
+#SBATCH --qos=m100_qos_dbg
+
+module purge
+module load profile/chem-phys
+module load python/3.8.2
+module load autoload qe-gpu/6.7
+
+export OMP_NUM_THREADS=8
+
+QE_BIN='pw.x'
+
+inp_file='pw.inp'
+out_file='pw.out'
+tot_file='pw_tot.out'
+status_file='STATUS.txt'
+
+N_POOL=2
+
+mpirun -gpu --map-by socket:PE=$OMP_NUM_THREADS --rank-by core $QE_BIN -nk $N_POOL -i $inp_file >> $out_file
+
+cat $out_file >> $tot_file
+
+autorestart=true
+
+if [[ -f $out_file && ! -f CRASH ]]; then
+    finish=$(grep -e 'Final energy' -e 'Final enthalpy' $out_file)
+    if [[ -n $(grep "'scf'" $inp_file) ]]; then
+        finish=$(grep -e ! $out_file)
+    fi
+    if [[ -n $finish ]]; then
+        echo '    ' $finish >> $status_file
+        if [[ -f ITERATION_0 ]]; then
+            if [ $autorestart = true ]; then
+                $BASH_SCRIPTS_DIR/run.sh pw -fs -i=1
+            fi
+        fi
+    else
+        grep -e 'energy   old' -e 'enthalpy old' $out_file | tail -1 >> $status_file
+        grep -e 'energy   new' -e 'enthalpy new' $out_file | tail -1 >> $status_file
+        if [ $autorestart = true ]; then
+            $BASH_SCRIPTS_DIR/run.sh pw -r
+        fi
+    fi
+fi
