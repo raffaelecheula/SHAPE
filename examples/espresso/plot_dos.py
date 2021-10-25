@@ -9,7 +9,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-from qe_utils import ReadQeOut, write_dos_input, get_dos
+from shape.qe_utils import ReadQeOut, write_dos_input, get_dos
 
 ################################################################################
 # PRINT DOS INPUT

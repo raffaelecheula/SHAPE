@@ -9,7 +9,7 @@ import os, argparse
 import numpy as np
 from ase.io import read
 from ase.calculators.espresso import Espresso
-from qe_utils import ReadQeInp, ReadQeOut
+from shape.qe_utils import ReadQeInp, ReadQeOut
 
 ################################################################################
 # PARSE CMD LINE ARGUMENTS

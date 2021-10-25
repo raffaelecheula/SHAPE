@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from distutils.util import strtobool
 from collections import OrderedDict
-from qe_utils import ReadQeOut, write_dos_input, get_dos
+from shape.qe_utils import ReadQeOut, write_dos_input, get_dos
 
 ################################################################################
 # PARSE CMD LINE ARGUMENTS

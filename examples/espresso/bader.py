@@ -9,7 +9,7 @@ import os, argparse
 import numpy as np
 from distutils.util import strtobool
 from collections import OrderedDict
-from qe_utils import write_pp_input
+from shape.qe_utils import write_pp_input
 
 ################################################################################
 # PARSE CMD LINE ARGUMENTS

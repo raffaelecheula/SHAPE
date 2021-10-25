@@ -11,8 +11,8 @@ from ase.io import read
 from ase.units import kB
 from ase.vibrations import Vibrations
 from ase.calculators.espresso import Espresso
-from qe_utils import ReadQeInp, ReadQeOut, write_modes_axsf
-from supercell_utils import atoms_not_fixed
+from shape.qe_utils import ReadQeInp, ReadQeOut, write_modes_axsf
+from shape.ase_utils import atoms_not_fixed
 
 ################################################################################
 # MAX SECONDS

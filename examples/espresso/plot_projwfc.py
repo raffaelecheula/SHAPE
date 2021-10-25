@@ -9,15 +9,16 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-from ase_utils import get_symbols_list
-from qe_utils import (write_projwfc_input,
-                      read_projwfc       ,
-                      ReadQeOut          ,
-                      get_atoms_details  ,
-                      print_atoms_details,
-                      plot_band_levels   ,
-                      scale_band_energies,
-                      get_pdos           )
+from shape.ase_utils import get_symbols_list
+from shape.qe_utils import (
+    ReadQeOut,
+    read_projwfc,
+    get_atoms_details,
+    print_atoms_details,
+    plot_band_levels,
+    scale_band_energies,
+    get_pdos,
+)
 
 ################################################################################
 # READ QE OUT

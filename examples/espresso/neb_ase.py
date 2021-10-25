@@ -13,7 +13,7 @@ from ase.neb import NEB, NEBTools
 from ase.io.trajectory import TrajectoryWriter
 from ase.calculators.espresso import Espresso
 from ase.parallel import world, parprint, paropen
-from qe_utils import read_qe_inp, read_qe_out, print_axsf
+from shape.qe_utils import read_qe_inp, read_qe_out, print_axsf
 
 ################################################################################
 # MAX SECONDS

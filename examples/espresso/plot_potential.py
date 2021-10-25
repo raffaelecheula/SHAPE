@@ -9,7 +9,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-from qe_utils import write_pp_input
+from shape.qe_utils import write_pp_input
 
 ################################################################################
 # PRINT PP INPUT
