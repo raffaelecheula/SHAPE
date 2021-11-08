@@ -6,14 +6,23 @@ from __future__ import absolute_import, division, print_function
 import ast, re, os
 import numpy as np
 import copy as cp
+from math import sin, pi, sqrt
 from collections import OrderedDict
-from ase import Atoms
+from ase import Atom, Atoms
+from ase.io import read
 from ase.io.espresso import SSSP_VALENCE
 from ase.data import atomic_numbers
-from ase.units import create_units
+from ase.units import kB, create_units
 from ase.constraints import FixAtoms, FixCartesian
 from ase.calculators.espresso import Espresso
-from ase_utils import get_symbols_list, get_symbols_dict
+from ase.parallel import world, parprint, paropen
+from ase_utils import (get_symbols_list       ,
+                       get_symbols_dict       ,
+                       get_formula_repetitions,
+                       print_axsf             ,
+                       read_axsf              ,
+                       read_vib_energies      ,
+                       write_modes_axsf       )
 
 ################################################################################
 # READ QUANTUM ESPRESSO OUT

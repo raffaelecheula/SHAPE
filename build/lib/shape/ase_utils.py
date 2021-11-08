@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import, division, print_function
 import numpy as np
+import copy as cp
 from math import sin, pi, sqrt
 from collections import OrderedDict
 from ase import Atom, Atoms
@@ -258,31 +259,6 @@ def write_modes_axsf(vib, kT = kB * 300, nimages = 30):
             vib.atoms.set_positions(p)
 
             print_axsf('mode_{}.axsf'.format(str(index)), animation)
-
-################################################################################
-# GET MOMENT OF INERTIA XYZ
-################################################################################
-
-def get_moments_of_inertia_xyz(atoms, center = None):
-
-    if center is None:
-        center = atoms.get_center_of_mass()
-
-    positions = atoms.get_positions()-center
-    masses = atoms.get_masses()
-
-    I = np.zeros(3)
-
-    for i in range(len(atoms)):
-
-        x, y, z = positions[i]
-        m = masses[i]
-
-        I[0] += m * (y**2 + z**2)
-        I[1] += m * (x**2 + z**2)
-        I[2] += m * (x**2 + y**2)
-
-    return I
 
 ################################################################################
 # END

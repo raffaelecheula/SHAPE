@@ -4,10 +4,11 @@
 
 from __future__ import absolute_import, division, print_function
 import numpy as np
-import ase
-from scipy.optimize import least_squares
+import ase, warnings
+from scipy.optimize import least_squares, fsolve
+from supercell_builder import convert_miller_index
 from scipy.interpolate import RectBivariateSpline
-from shape.units import eV, molecule, Rgas
+from shape.units import Joule, kmol, eV, molecule, Rgas
 from wulff_with_support import WulffShape
 
 ################################################################################
