@@ -9,7 +9,7 @@ from collections import OrderedDict
 from ase import Atom, Atoms
 from ase.units import kB
 from ase.io.espresso import SSSP_VALENCE
-from ase.parallel import world, parprint, paropen
+from ase.parallel import paropen
 
 ################################################################################
 # GET SYMBOLS LIST
@@ -127,8 +127,6 @@ def print_axsf(filename, animation, variable_cell = False, parallel = False):
         f = paropen(filename, 'w+')
     else:
         f = open(filename, 'w+')
-
-    possible_types = get_atom_list(animation[0])
 
     print(' ANIMSTEP', len(animation), file = f)
     print(' CRYSTAL', file = f)

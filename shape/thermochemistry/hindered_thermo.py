@@ -263,23 +263,6 @@ class HinderedThermo(ThermoChem):
         return S
 
 
-        # Concentration Related Entropy
-        if self.with_std_conc_entropy is True:
-            N_over_A = np.exp(1. / 3) * (10.0**5 /
-                                        (units._k * temperature))**(2. / 3)
-            teta = N_over_A * self.area                            
-            S_c = np.log((1-teta)/teta) - np.log(1-teta)/teta
-            S_c *= units.kB
-            write(fmt % ('S_con', S_c, S_c * temperature))
-            S += S_c
-
-        write('-' * 49)
-        write(fmt % ('S', S, S * temperature))
-        write('=' * 49)
-
-        return S
-
-
     def get_helmholtz_energy(self, temperature, verbose = True):
         """Returns the Helmholtz free energy, in eV, in the hindered
         translator and hindered rotor model at a specified temperature
