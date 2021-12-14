@@ -5,9 +5,7 @@
 ################################################################################
 
 import os, argparse
-import numpy as np
 from distutils.util import strtobool
-from collections import OrderedDict
 from shape.qe_utils import write_pp_input
 
 ################################################################################
@@ -74,8 +72,8 @@ write_input = parsed_args.write_input[0]
 
 if write_input is True:
 
-    pp_data   = OrderedDict()
-    plot_data = OrderedDict()
+    pp_data   = {}
+    plot_data = {}
     
     pp_data['prefix']          = prefix
     pp_data['outdir']          = pw_out_dir+outdir

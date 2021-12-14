@@ -5,7 +5,6 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 from math import sin, pi, sqrt
-from collections import OrderedDict
 from ase import Atom, Atoms
 from ase.units import kB
 from ase.io.espresso import SSSP_VALENCE
@@ -48,7 +47,7 @@ def get_atom_list(atoms):
 
 def get_symbols_dict(atoms):
 
-    symbols_dict = OrderedDict()
+    symbols_dict = {}
 
     symbols = atoms.get_chemical_symbols()
     for symbol in symbols:

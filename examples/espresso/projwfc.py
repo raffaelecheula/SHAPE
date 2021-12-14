@@ -6,8 +6,18 @@
 
 import os, argparse
 from distutils.util import strtobool
-from collections import OrderedDict
-from shape.qe_utils import write_projwfc_input
+import matplotlib.pyplot as plt
+from shape.ase_utils import get_symbols_list
+from shape.qe_utils import (
+    ReadQeOut,
+    read_projwfc,
+    get_atoms_details,
+    print_atoms_details,
+    plot_band_levels,
+    scale_band_energies,
+    get_pdos,
+    write_projwfc_input,
+)
 
 ################################################################################
 # PARSE CMD LINE ARGUMENTS
@@ -73,7 +83,7 @@ write_input = parsed_args.write_input[0]
 
 if write_input is True:
 
-    proj_data = OrderedDict()
+    proj_data = {}
 
     proj_data['prefix']  = prefix
     proj_data['outdir']  = pw_out_dir+outdir

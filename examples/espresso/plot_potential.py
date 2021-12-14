@@ -6,7 +6,6 @@
 
 import os
 import matplotlib.pyplot as plt
-from collections import OrderedDict
 from shape.qe_utils import write_pp_input
 
 ################################################################################
@@ -15,8 +14,8 @@ from shape.qe_utils import write_pp_input
 
 print_pp_inp = True
 
-pp_data   = OrderedDict()
-plot_data = OrderedDict()
+pp_data   = {}
+plot_data = {}
 
 pp_data['prefix']   = 'calc'
 pp_data['outdir']   = 'tmp'

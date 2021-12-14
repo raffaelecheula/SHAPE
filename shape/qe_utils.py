@@ -13,7 +13,7 @@ from ase.data import atomic_numbers
 from ase.units import create_units
 from ase.constraints import FixAtoms, FixCartesian
 from ase.calculators.espresso import Espresso
-from ase_utils import get_symbols_list, get_symbols_dict
+from shape.ase_utils import get_symbols_list, get_symbols_dict
 
 ################################################################################
 # READ QUANTUM ESPRESSO OUT
@@ -915,8 +915,6 @@ def print_atoms_details(atoms_pp_list, filename = 'atom_details.out'):
 
     print('\n SHARED BANDS \n', file = fileobj)
     
-    shared_band = OrderedDict()
-
     for num in sorted([n for n in count_bands if len(count_bands[n]) > 1]):
     
         all_bands = sum([a.bands for a in atoms_pp_list], [])

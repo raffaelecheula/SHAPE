@@ -6,6 +6,7 @@
 
 import signal
 #from mpi4py import MPI
+from ase.io import read
 from ase.optimize import BFGS, FIRE, MDMin
 from ase.neb import NEB, NEBTools
 from ase.io.trajectory import TrajectoryWriter

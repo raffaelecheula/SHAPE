@@ -7,7 +7,6 @@
 import os, argparse
 import matplotlib.pyplot as plt
 from distutils.util import strtobool
-from collections import OrderedDict
 from shape.qe_utils import write_dos_input, get_dos
 
 ################################################################################
@@ -77,7 +76,7 @@ write_input = parsed_args.write_input[0]
 
 if write_input is True:
 
-    dos_data = OrderedDict()
+    dos_data = {}
 
     dos_data['prefix']  = prefix
     dos_data['outdir']  = pw_out_dir+outdir

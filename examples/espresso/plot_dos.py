@@ -6,7 +6,6 @@
 
 import os
 import matplotlib.pyplot as plt
-from collections import OrderedDict
 from shape.qe_utils import write_dos_input, get_dos
 
 ################################################################################
@@ -15,7 +14,7 @@ from shape.qe_utils import write_dos_input, get_dos
 
 print_dos_inp = True
 
-dos_data = OrderedDict()
+dos_data = {}
 
 dos_data['prefix']  = 'calc'
 dos_data['outdir']  = 'tmp'
