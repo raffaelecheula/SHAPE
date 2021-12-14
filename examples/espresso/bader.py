@@ -4,7 +4,6 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 import os, argparse
 import numpy as np
 from distutils.util import strtobool

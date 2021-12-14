@@ -4,11 +4,7 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
-import os
-import numpy as np
 import matplotlib.pyplot as plt
-from collections import OrderedDict
 from shape.ase_utils import get_symbols_list
 from shape.qe_utils import (
     ReadQeOut,

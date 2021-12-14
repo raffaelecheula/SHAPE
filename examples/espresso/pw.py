@@ -4,10 +4,7 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import division, print_function
 import os, argparse
-import numpy as np
-from ase.io import read
 from ase.calculators.espresso import Espresso
 from shape.qe_utils import ReadQeInp, ReadQeOut
 

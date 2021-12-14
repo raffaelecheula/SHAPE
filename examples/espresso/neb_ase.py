@@ -4,9 +4,7 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
-import os, shutil, argparse, signal
-import numpy as np
+import signal
 #from mpi4py import MPI
 from ase.optimize import BFGS, FIRE, MDMin
 from ase.neb import NEB, NEBTools

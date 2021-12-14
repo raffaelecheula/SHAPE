@@ -4,14 +4,17 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 import os, argparse
-from math import ceil
-import numpy as np
 from ase.neb import NEB
 from ase.calculators.espresso import Espresso
-from shape.qe_utils import (write_neb_inp, print_axsf, read_qe_inp, read_qe_out,
-                            read_neb_crd, reorder_neb_images)
+from shape.qe_utils import (
+    write_neb_inp,
+    print_axsf,
+    read_qe_inp,
+    read_qe_out,
+    read_neb_crd,
+    reorder_neb_images
+)
 
 ################################################################################
 # MAX SECONDS

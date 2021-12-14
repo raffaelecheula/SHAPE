@@ -4,10 +4,7 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
 ################################################################################
 
-from __future__ import division, print_function
 import signal
-import numpy as np
-from ase.io import read
 from ase.units import kB
 from ase.vibrations import Vibrations
 from ase.calculators.espresso import Espresso
