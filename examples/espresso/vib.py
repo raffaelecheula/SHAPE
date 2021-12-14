@@ -50,7 +50,8 @@ calc = Espresso(input_data       = input_data    ,
                 calculation      = 'scf'         ,
                 restart_mode     = 'from_scratch',
                 max_seconds      = max_seconds   ,
-                conv_thr         = conv_thr      )
+                conv_thr         = conv_thr      ,
+                label            = 'vib'         )
 
 atoms.set_calculator(calc)
 
@@ -61,7 +62,7 @@ elif atoms_to_vib == 'only_relaxed':
     indices = atoms_not_fixed(atoms)
 
 elif type(atoms_to_vib) == int:
-    indices = [a.index for a in atoms][len(atoms)-atoms_to_vib:]
+    indices = [a.index for a in atoms][-atoms_to_vib:]
 
 else:
     indices = atoms_to_vib
