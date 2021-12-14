@@ -8,8 +8,8 @@ import signal
 from ase.units import kB
 from ase.vibrations import Vibrations
 from ase.calculators.espresso import Espresso
-from shape.qe_utils import ReadQeInp, ReadQeOut, write_modes_axsf
-from shape.ase_utils import atoms_not_fixed
+from shape.qe_utils import ReadQeInp, ReadQeOut
+from shape.ase_utils import atoms_not_fixed, write_modes_axsf
 
 ################################################################################
 # MAX SECONDS
