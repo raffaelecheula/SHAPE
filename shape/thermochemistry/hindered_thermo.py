@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from ase import units
 from ase.thermochemistry import ThermoChem
-from ase_utils import get_moments_of_inertia_xyz
+from shape.ase_utils import get_moments_of_inertia_xyz
 
 ################################################################################
 # HINDERED THERMO CLASS

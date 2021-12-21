@@ -8,7 +8,7 @@ import ase
 from scipy.optimize import least_squares
 from scipy.interpolate import RectBivariateSpline
 from shape.units import eV, molecule, Rgas
-from wulff_with_support import WulffShape
+from shape.thermochemistry.wulff_with_support import WulffShape
 
 ################################################################################
 # STANDARD CONCENTRATION ENTROPY
