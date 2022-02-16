@@ -301,6 +301,7 @@ class ReadQeInp:
 
         self.filename = filename
         self.atoms    = None
+        self.label    = filename.split('.')[0]
 
     def get_data_pseudos_kpts(self):
 
@@ -312,6 +313,18 @@ class ReadQeInp:
         self.koffset    = koffset
 
         return input_data, pseudos, kpts, koffset
+
+    def get_calculator(self):
+        
+        input_data, pseudos, kpts, koffset = self.get_data_pseudos_kpts()
+        
+        calc = Espresso(input_data       = input_data,
+                        pseudopotentials = pseudos   ,
+                        kpts             = kpts      ,
+                        koffset          = koffset   ,
+                        label            = self.label)
+        
+        return calc
 
     def get_atoms(self):
 
@@ -534,7 +547,9 @@ def read_pw_bands(filename = 'pw.out', scale_band_energies = True):
             kpts_list += [kpt]
         if read_bands is True:
             if count == 1:
-                e_bands_dict[kpt] += [float(b) for b in line.split()]
+                for i in range(8):
+                    if len(line) > 9*(i+1)+2:
+                        e_bands_dict[kpt] += [float(line[9*i+2:9*(i+1)+2])]
             if len(line.strip()) == 0 or line == '\n':
                 count += 1
         if 'the Fermi energy is' in line:
@@ -542,7 +557,7 @@ def read_pw_bands(filename = 'pw.out', scale_band_energies = True):
 
     n_kpts *= n_spin
 
-    assert n_kpts == kpts_list[-1]
+    #assert n_kpts == kpts_list[-1]
 
     if scale_band_energies is True:
 
@@ -734,7 +749,7 @@ class AtomPP:
 # READ PROJWFC
 ################################################################################
 
-def read_projwfc(filename, kpoint):
+def read_projwfc(filename, kpoint, print_summary = False):
 
     fileobj = open(filename, 'rU')
     lines = fileobj.readlines()
@@ -744,81 +759,63 @@ def read_projwfc(filename, kpoint):
     bands_list = []
 
     read = False
-
     kpt = 0
     band_num = 0
 
     for line in lines:
 
         if 'state #' in line:
-
             state_num = int(line[12:16])
             atom_num = int(line[22:26])
             element = line[28:30].strip()
             shell_num = int(line[38:40])
             l = int(line[44:45])
             m = int(line[48:50])
-
             state = State(state_num = state_num,
                           atom_num  = atom_num ,
                           element   = element  ,
                           shell_num = shell_num,
                           l         = l        ,
                           m         = m        )
-
             states_list += [state]
 
         if ' k = ' in line:
             kpt += 1
 
         if kpoint == kpt:
-
             if '    |psi|^2' in line:
-
                 read = False
-
                 band = Band(band_num   = band_num  ,
                             energy     = energy    ,
                             state_nums = state_nums,
                             weights    = weights   )
-
                 bands_list += [band]
 
             if read is True:
-
                 for i in range(5):
-
                     weight = line[11+14*i:16+14*i]
                     state_num = line[19+14*i:23+14*i]
-
                     try:
-
                         weights += [float(weight)]
                         state_nums += [int(state_num)]
-
                     except: pass
 
-
             if '==== e(' in line:
-
                 read = True
-
                 band_num = int(line[7:11])
                 energy = float(line[14:26])
                 weights = []
                 state_nums = []
 
             if '     e =' in line:
-
                 read = True
-
                 band_num += 1
                 energy = float(line[8:20])
                 weights = []
                 state_nums = []
 
-    print('n states = {0} - n bands = {1}'.format(len(states_list),
-                                                  len(bands_list)))
+    if print_summary is True:
+        print(f'n states = {len(states_list)} - n bands = {len(bands_list)}')
 
     return states_list, bands_list
 
@@ -838,7 +835,7 @@ def scale_band_energies(band_list, e_fermi):
 # GET ATOMS DETAILS
 ################################################################################
 
-def get_atoms_details(states_list, bands_list, atom_num_list, delta_e,
+def get_atoms_details(states_list, bands_list, atom_num_list, delta_e = 0.,
                       color_dict = None):
 
     atoms_pp_list = []
@@ -1006,23 +1003,21 @@ def get_pdos(filename, e_fermi):
     energy = np.zeros(len(lines)-1)
 
     if nspin == 2:
-        dos = np.zeros((len(lines)-1, 2))
+        pdos = np.zeros((len(lines)-1, 2))
     else:
-        dos = np.zeros(len(lines)-1)
+        pdos = np.zeros(len(lines)-1)
 
-    for i in range(1, len(lines)-1):
+    for i, line in enumerate(lines[1:]):
 
-        line = lines[i]
         energy[i] = float(line.split()[0])-e_fermi
 
         if nspin == 2:
-            dos[i, 0] = float(line.split()[1])
-            dos[i, 1] = float(line.split()[2])
-            print(line.split()[1])
+            pdos[i, 0] = float(line.split()[1])
+            pdos[i, 1] = float(line.split()[2])
         else:
-            dos[i] = float(line.split()[1])
+            pdos[i] = float(line.split()[1])
 
-    return energy, dos
+    return energy, pdos
 
 ################################################################################
 # GET DOS
@@ -1048,9 +1043,8 @@ def get_dos(filename):
 
     e_fermi = float(lines[0].split()[-2])
 
-    for i in range(1, len(lines)-1):
+    for i, line in enumerate(lines[1:]):
 
-        line = lines[i]
         energy[i] = float(line.split()[0])-e_fermi
 
         if nspin == 2:
@@ -1143,9 +1137,7 @@ def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
         atoms.set_cell(v*cell_zero, scale_atoms = True)
     
         calc = atoms.get_calculator()
-        
         calc.write_input(atoms)
-        os.rename('espresso.pwi', 'pw.inp')
     
         x += (2.*delta_x)/(npoints-1)
     
@@ -1158,7 +1150,7 @@ def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
 # READ EOS OUTPUTS
 ################################################################################
 
-def read_eos_outputs(npoints, filename = 'pw.out', get_cells = False):
+def read_eos_outputs(npoints, filename = 'pw.pwo', get_cells = False):
 
     volumes  = []
     energies = []
