@@ -1,8 +1,7 @@
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
+# Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 import numpy as np
 from math import sin, pi, sqrt
 from ase import Atom, Atoms
@@ -48,11 +47,12 @@ def get_atom_list(atoms):
 def get_symbols_dict(atoms):
 
     symbols_dict = {}
-
     symbols = atoms.get_chemical_symbols()
     for symbol in symbols:
-        try: symbols_dict[symbol] += 1
-        except: symbols_dict[symbol] = 1
+        if symbol in symbols_dict:
+            symbols_dict[symbol] += 1
+        else:
+            symbols_dict[symbol] = 1
 
     return symbols_dict
 
@@ -63,7 +63,6 @@ def get_symbols_dict(atoms):
 def get_formula_repetitions(atoms):
 
     symbols_dict = get_symbols_dict(atoms)
-
     formula_repetitions = min([symbols_dict[i] for i in symbols_dict])
 
     return formula_repetitions
@@ -110,7 +109,6 @@ def atoms_not_fixed(atoms):
 def get_valence_electrons(atoms):
 
     n_electrons = 0
-    
     for a in atoms:
         n_electrons += SSSP_VALENCE[a.number]
     
@@ -164,9 +162,8 @@ def print_axsf(filename, animation, variable_cell = False, parallel = False):
 
 def read_axsf(filename):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     for line in lines:
         if 'PRIMCOORD' in line:
@@ -181,7 +178,7 @@ def read_axsf(filename):
             if 'PRIMVEC' in line:
                 break
         cell_vectors = np.zeros((3, 3))
-        for i, line in enumerate(lines[n + 1 : n + 4]):
+        for i, line in enumerate(lines[n+1:n+4]):
             entries = line.split()
             cell_vectors[i][0] = float(entries[0])
             cell_vectors[i][1] = float(entries[1])
@@ -198,14 +195,14 @@ def read_axsf(filename):
     for n, line in enumerate(lines):
         if key in line:
             atoms = Atoms(cell = cell_vectors, pbc = (True, True, True))
-            for line in lines[ n + increment : ]:
+            for line in lines[n+increment:]:
                 entr = line.split()
                 if entr[0] == key:
                     break
                 symbol = entr[0]
                 position = (float(entr[1]), float(entr[2]), float(entr[3]))
                 atoms += Atom(symbol, position = position)
-                animation += [ atoms ]
+            animation += [atoms]
 
     return animation
 
@@ -228,9 +225,9 @@ def read_vib_energies(filename = 'log.txt', imaginary = False):
         string = lines[i].split()[1]
         if string[-1] == 'i':
             if imaginary is True:
-                vib_energies.append(complex(0., float(string[:-1]) * 1e-3))
+                vib_energies.append(complex(0., float(string[:-1])*1e-3))
         else:
-            vib_energies.append(complex(float(string) * 1e-3))
+            vib_energies.append(complex(float(string)*1e-3))
 
     return vib_energies
 
@@ -238,14 +235,13 @@ def read_vib_energies(filename = 'log.txt', imaginary = False):
 # READ MODES AXSF
 ################################################################################
 
-def write_modes_axsf(vib, kT = kB * 300, nimages = 30):
+def write_modes_axsf(vib, kT = kB*300, nimages = 30):
 
     for index, energy in enumerate(vib.get_energies()):
 
         if abs(energy) > 1e-5:
         
             animation = []
-
             mode = vib.get_mode(index) * sqrt(kT / abs(vib.hnu[index]))
             p = vib.atoms.positions.copy()
             index %= 3 * len(vib.indices)
@@ -275,9 +271,9 @@ def get_moments_of_inertia_xyz(atoms, center = None):
         x, y, z = positions[i]
         m = masses[i]
 
-        I[0] += m * (y**2 + z**2)
-        I[1] += m * (x**2 + z**2)
-        I[2] += m * (x**2 + y**2)
+        I[0] += m*(y**2+z**2)
+        I[1] += m*(x**2+z**2)
+        I[2] += m*(x**2+y**2)
 
     return I
 
