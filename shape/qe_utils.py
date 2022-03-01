@@ -2,13 +2,9 @@
 # Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
-<<<<<<< HEAD
 import ast
 import re
 import os
-=======
-import ast, re, os
->>>>>>> 41d4a12f0e3ac4afe2a4f50671342916f20555a2
 import numpy as np
 import copy as cp
 from ase import Atoms
