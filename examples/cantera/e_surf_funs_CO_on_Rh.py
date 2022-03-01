@@ -1,12 +1,13 @@
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
+# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
-from collections import OrderedDict
 from scipy.interpolate import make_interp_spline
-from supercell_builder import convert_miller_index
-from ab_initio_thermodynamics import surface_energies, surface_energies_funs
+from shape.ase_utils import convert_miller_index
+from shape.thermochemistry.ab_initio_thermodynamics import (
+    surface_energies, 
+    surface_energies_funs,
+)
 
 ################################################################################
 # INITIALIZATION
@@ -23,7 +24,7 @@ e_surf_supp = 0.02459 # [eV/Angstrom**2]
 
 corr_e_surf = True
 
-planes = OrderedDict() # [eV/Angstrom**2]
+planes = {} # [eV/Angstrom**2]
 
 ################################################################################
 # 100 SURFACE

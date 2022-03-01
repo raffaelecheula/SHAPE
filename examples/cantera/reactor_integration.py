@@ -1,40 +1,38 @@
 #!/usr/bin/env python3
 
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
+# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
-import csv, os, warnings, timeit, sys
+import os
+import csv
+import timeit
 import cantera as ct
 import numpy as np
 import copy as cp
 import matplotlib.pyplot as plt
-from scipy.interpolate import make_interp_spline
-from collections import OrderedDict
 from pymatgen.core.lattice import Lattice
-from wulff_with_support import WulffShape
+from shape.thermochemistry.wulff_with_support import WulffShape
 from shape.units import *
-from supercell_builder import convert_miller_index
-from ab_initio_thermodynamics import (surface_energies         ,
-                                      surface_energies_funs    ,
-                                      wulff_shape_from_diameter)
-from cantera_utils import (get_H0_0K_dict                  ,
-                           get_deltamu_dict                ,
-                           get_std_gibbs_dict              ,
-                           get_enthalpies_dict             ,
-                           get_std_entropies_dict          ,
-                           print_RPA_details               ,
-                           update_kinetics                 ,
-                           update_kinetics_facet           ,
-                           advance_to_steady_state         ,
-                           advance_and_update_kinetics     ,
-                           reaction_path_analysis          ,
-                           calculate_steady_state_coverages,
-                           modify_activation_energies      ,
-                           get_reactions_data              ,
-                           get_energy_path                 ,
-                           plot_energy_paths               )
+from shape.ase_utils import convert_miller_index
+from shape.thermochemistry.ab_initio_thermodynamics import (
+    wulff_shape_from_diameter,
+)
+from shape.cantera_utils import (
+    get_H0_0K_dict                  ,
+    get_deltamu_dict                ,
+    get_std_gibbs_dict              ,
+    get_enthalpies_dict             ,
+    get_std_entropies_dict          ,
+    update_kinetics                 ,
+    update_kinetics_facet           ,
+    advance_to_steady_state         ,
+    reaction_path_analysis          ,
+    calculate_steady_state_coverages,
+    get_reactions_data              ,
+    get_energy_path                 ,
+    plot_energy_paths               ,
+)
 
 ################################################################################
 # MEASURE TIME START
@@ -50,6 +48,11 @@ if measure_time is True:
 ################################################################################
 
 reaction = 'revWGS'
+
+results_dir = 'results'
+csv_file    = 'results.csv'
+RPA_file    = 'RPA.txt'
+DRC_file    = 'DRC.txt'
 
 """
 Discretization parameters.
@@ -67,10 +70,8 @@ Composition parameters.
 fixed_comp    = False
 conversion    = 0.20
 eta_reaction  = None # 1.e+02
-
 concentration = None # (1.00*atm*0.10)/(Rgas*273.15*Kelvin)
-
-z_analysis = 0.022 * centimeter
+z_analysis    = 0.022 * centimeter
 
 """
 Reaction path analysis (RPA).
@@ -123,8 +124,11 @@ plot_wulff = False
 Print outlet composition and DRCs.
 """
 
-print_outputs = True
-print_csv     = True
+var_type = None
+var_num  = 1
+
+print_outputs = False
+print_csv     = False
 
 if reaction in ('WGS', 'revWGS'):
     gas_selected = ['CO', 'H2O', 'CO2', 'H2']
@@ -145,7 +149,7 @@ all_plots     = False
 plot_rates    = False
 plot_paths    = False
 
-y_max_plot = 0.012
+y_max_plot = 0.02
 width      = 0.8
 tick_size  = 14
 label_size = 16
@@ -156,14 +160,13 @@ Parameters of the model.
 
 lateral_inter = True
 update_kin    = True
-
 fixed_shape   = False
 
 """
 File with thermodynamic and kinetics parameters.
 """
 
-cti_file = 'Cheula_Stucchi_HRHT.cti'
+cti_file = 'WGS_on_Rh_HRHT.cti.cti'
 
 ################################################################################
 # OPERATIVE CONDITIONS
@@ -175,7 +178,7 @@ temperature = Celsius_to_Kelvin(temperature_celsius)
 pressure    =  1.00 * atm
 
 gas_molar_fracs = {}
-molar_fracs     = 0.10
+molar_fracs     = 0.01
 
 if reaction == 'WGS':
 
@@ -599,26 +602,6 @@ for i in range(len(active_phases)):
         coeffs_dict[spec] = coeffs
 
 ################################################################################
-# MODIFY ACTIVATION ENERGIES
-################################################################################
-
-"""
-Modify all the activation energies.
-"""
-
-if modify_Eact is True:
-
-    for i in range(len(active_phases)):
-
-        cat = cat_list[i]
-        TS  = TS_list[i]
-
-        coeffs_dict = modify_activation_energies(cat          = cat        ,
-                                                 TS           = TS         ,
-                                                 corr         = corr_Eact  ,
-                                                 coeffs_dict  = coeffs_dict)
-
-################################################################################
 # CALCULATE WULFF SHAPE
 ################################################################################
 
@@ -717,6 +700,8 @@ if update_kin is True:
 ################################################################################
 
 if print_outputs is True:
+
+    os.makedirs(results_dir, exist_ok = True)
 
     filename = results_dir+'/INLET_{:+06.2f}'.format(var_num)
 
@@ -1483,8 +1468,8 @@ elif reaction == 'revWGS':
     G0_ref_dict['C'] = G0_dict['CO2']-2*G0_ref_dict['O']
     G0_ref_dict['H'] = G0_dict['H2']/2.
 
-G0_rel_TS_dict = OrderedDict()
-G0_rel_TS_selected = OrderedDict()
+G0_rel_TS_dict = {}
+G0_rel_TS_selected = {}
 
 for i in range(len(active_phases)):
     
@@ -1531,9 +1516,7 @@ if print_outputs is True:
 # PRINT REACTIONS DETAILS
 ################################################################################
 
-print_reactions_details = True
-
-if print_reactions_details is True:
+if print_outputs is True:
 
     filename = results_dir+'/H0_G0_{:+06.2f}'.format(var_num)
 
@@ -1677,7 +1660,7 @@ if plot_paths is True:
         TS = TS_list[i]
         TS.TP = gas.TP
     
-        species_dict = OrderedDict()
+        species_dict = {}
     
         species_dict['CO']  = 1. if reaction == 'WGS' else 0.
         species_dict['H2O'] = 1. if reaction == 'WGS' else 0.
@@ -1738,7 +1721,7 @@ if plot_paths is True:
         TS = TS_list[i]
         TS.TP = gas.TP
     
-        species_dict = OrderedDict()
+        species_dict = {}
     
         species_dict['CO']  = 1. if reaction == 'WGS' else 0.
         species_dict['H2O'] = 1. if reaction == 'WGS' else 0.
@@ -1799,7 +1782,7 @@ if plot_paths is True:
         TS = TS_list[i]
         TS.TP = gas.TP
     
-        species_dict = OrderedDict()
+        species_dict = {}
     
         species_dict['CO']  = 1. if reaction == 'WGS' else 0.
         species_dict['H2O'] = 1. if reaction == 'WGS' else 0.
@@ -1861,7 +1844,7 @@ if plot_paths is True:
         TS = TS_list[i]
         TS.TP = gas.TP
     
-        species_dict = OrderedDict()
+        species_dict = {}
     
         species_dict['CO']  = 1. if reaction == 'WGS' else 0.
         species_dict['H2O'] = 1. if reaction == 'WGS' else 0.
@@ -1922,7 +1905,7 @@ if plot_paths is True and 'CH4' in gas_selected:
         TS = TS_list[i]
         TS.TP = gas.TP
     
-        species_dict = OrderedDict()
+        species_dict = {}
     
         species_dict['CO('+site_name+')']  = 1.
         species_dict['H('+site_name+')'] = 6.
@@ -2039,7 +2022,7 @@ if DRC is True:
         dn_original = np.array([x if abs(x) > 0. else 1e-50
                                 for x in dn_original]) 
     
-        DRC_dict = OrderedDict()
+        DRC_dict = {}
         step_selected_names = []
 
         for i in range(len(cat_list)):

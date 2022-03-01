@@ -2,7 +2,6 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 import numpy as np
 from ase import units
 from ase.thermochemistry import ThermoChem

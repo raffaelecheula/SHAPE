@@ -2,7 +2,6 @@
 # Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 import numpy as np
 from math import sin, pi, sqrt
 from ase import Atom, Atoms
@@ -280,6 +279,23 @@ def get_moments_of_inertia_xyz(atoms, center = None):
         I[2] += m * (x**2 + y**2)
 
     return I
+
+################################################################################
+# CONVERT MILLER INDEX
+################################################################################
+
+def convert_miller_index(miller_index):
+
+    if isinstance(miller_index, str):
+        miller_index = list(miller_index)
+        for i in range(len(miller_index)):
+            miller_index[i] = int(miller_index[i])
+        miller_index = tuple(miller_index)
+    
+    elif isinstance(miller_index, list):
+        miller_index = tuple(miller_index)
+
+    return miller_index
 
 ################################################################################
 # END
