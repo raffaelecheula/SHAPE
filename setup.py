@@ -8,7 +8,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
     name="SHAPE",
-    version="0.1.1",
+    version="0.1.2",
     url="https://github.com/raffaelecheula/SHAPE.git",
 
     author="Raffaele Cheula",

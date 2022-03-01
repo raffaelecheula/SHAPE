@@ -1,13 +1,16 @@
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
+# Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
+<<<<<<< HEAD
 import ast
 import re
 import os
+=======
+import ast, re, os
+>>>>>>> 41d4a12f0e3ac4afe2a4f50671342916f20555a2
 import numpy as np
 import copy as cp
-from collections import OrderedDict
 from ase import Atoms
 from ase.io.espresso import SSSP_VALENCE
 from ase.data import atomic_numbers
@@ -30,9 +33,8 @@ def read_qe_out(filename):
     spin_pol_inp = False
     spin_pol_out = False
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     n_mag_inp = []
 
@@ -148,13 +150,11 @@ def read_qe_out(filename):
                 symbol += name[i]
         
         if spin_pol_inp is True or spin_pol_out is True:
-        
             magmom = magmoms_dict[name]
             magmom *= SSSP_VALENCE[atomic_numbers[symbol]]
             magmoms = [magmom]
 
         else:
-
             magmoms = [0.]*len(positions)
 
         if atomic_pos_units == 'crystal':
@@ -174,15 +174,10 @@ def read_qe_out(filename):
 
     constraints.append(FixAtoms(indices = indices))
     atoms.set_constraint(constraints)
-
     results = {'energy' : energy}
-
     calc = Espresso()
-
     calc.results = results
-
     atoms.set_calculator(calc)
-
     atoms.potential_energy = energy
 
     return atoms
@@ -237,9 +232,8 @@ class ReadQeOut:
 
 def read_qe_inp(filename):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     n_as = 0
     n_kp = 0
@@ -284,8 +278,8 @@ def read_qe_inp(filename):
         pseudos[element] = pseudo
 
     if gamma:
-        kpts = (1, 1, 1)
-        koffset = (0, 0, 0)
+        kpts = (1,1,1)
+        koffset = (0,0,0)
     else:
         kpts = [ int(i) for i in lines[n_kp+1].split()[:3] ]
         koffset = [ int(i) for i in lines[n_kp+1].split()[3:] ]
@@ -302,6 +296,7 @@ class ReadQeInp:
 
         self.filename = filename
         self.atoms    = None
+        self.label    = filename.split('.')[0]
 
     def get_data_pseudos_kpts(self):
 
@@ -313,6 +308,18 @@ class ReadQeInp:
         self.koffset    = koffset
 
         return input_data, pseudos, kpts, koffset
+
+    def get_calculator(self):
+        
+        input_data, pseudos, kpts, koffset = self.get_data_pseudos_kpts()
+        
+        calc = Espresso(input_data       = input_data,
+                        pseudopotentials = pseudos   ,
+                        kpts             = kpts      ,
+                        koffset          = koffset   ,
+                        label            = self.label)
+        
+        return calc
 
     def get_atoms(self):
 
@@ -376,43 +383,43 @@ class ReadQeInp:
 
 def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 
-    neb_dict = OrderedDict([['string_method'       , None],
-                            ['restart_mode'        , None],
-                            ['nstep_path'          , None],
-                            ['num_of_images'       , None],
-                            ['opt_scheme'          , None],
-                            ['CI_scheme'           , None],
-                            ['first_last_opt'      , None],
-                            ['minimum_image'       , None],
-                            ['temp_req'            , None],
-                            ['ds'                  , None],
-                            ['k_max'               , None],
-                            ['k_min'               , None],
-                            ['path_thr'            , None],
-                            ['use_masses'          , None],
-                            ['use_freezing'        , None],
-                            ['lfcpopt'             , None],
-                            ['fcp_mu'              , None],
-                            ['fcp_tot_charge_first', None],
-                            ['fcp_tot_charge_last' , None]])
+    neb_dict = {
+        'string_method'        : None,
+        'restart_mode'         : None,
+        'nstep_path'           : None,
+        'num_of_images'        : None,
+        'opt_scheme'           : None,
+        'CI_scheme'            : None,
+        'first_last_opt'       : None,
+        'minimum_image'        : None,
+        'temp_req'             : None,
+        'ds'                   : None,
+        'k_max'                : None,
+        'k_min'                : None,
+        'path_thr'             : None,
+        'use_masses'           : None,
+        'use_freezing'         : None,
+        'lfcpopt'              : None,
+        'fcp_mu'               : None,
+        'fcp_tot_charge_first' : None,
+        'fcp_tot_charge_last'  : None,
+    }
 
     for arg in input_data_neb:
         neb_dict[arg] = input_data_neb[arg]
 
-    f = open(filename, mode)
+    with open(filename, mode) as f:
 
-    f.write('&PATH\n')
-    for arg in [ arg for arg in neb_dict if neb_dict[arg] is not None ]:
-        if isinstance(neb_dict[arg], str):
-            neb_dict[arg] = '\''+neb_dict[arg]+'\''
-        elif neb_dict[arg] is True:
-            neb_dict[arg] = '.true.'
-        elif neb_dict[arg] is False:
-            neb_dict[arg] = '.false.'
-        f.write('   {0} = {1}\n'.format(str(arg).ljust(16), neb_dict[arg]))
-    f.write('/')
-
-    f.close()
+        f.write('&PATH\n')
+        for arg in [arg for arg in neb_dict if neb_dict[arg] is not None]:
+            if isinstance(neb_dict[arg], str):
+                neb_dict[arg] = '\''+neb_dict[arg]+'\''
+            elif neb_dict[arg] is True:
+                neb_dict[arg] = '.true.'
+            elif neb_dict[arg] is False:
+                neb_dict[arg] = '.false.'
+            f.write('   {0} = {1}\n'.format(str(arg).ljust(16), neb_dict[arg]))
+        f.write('/')
 
 ################################################################################
 # WRITE NEB INP
@@ -420,53 +427,48 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 
 def write_neb_inp(input_data_neb, images, calc, filename = 'neb.inp'):
 
-    f = open(filename, 'w+')
-    
-    f.write('BEGIN\n')
-    f.write('BEGIN_PATH_INPUT\n')
+    calc = calc.copy()
 
-    f.close()
+    with open(filename, 'w+') as f:
+        f.write('BEGIN\n')
+        f.write('BEGIN_PATH_INPUT\n')
 
     write_neb_dat(input_data_neb, filename, mode = 'a+')
 
-    f = open(filename, 'a+')
+    with open(filename, 'a+') as f:
 
-    f.write('\nEND_PATH_INPUT\n')
-    f.write('BEGIN_ENGINE_INPUT\n')
+        f.write('\nEND_PATH_INPUT\n')
+        f.write('BEGIN_ENGINE_INPUT\n')
 
-    for i in range(len(images)):
+        for i in range(len(images)):
 
-        calc.write_input(images[i])
+            calc.write_input(images[i])
 
-        g = open('espresso.pwi', 'rU')
-        lines = g.readlines()
-        g.close()
-        
-        for n, line in enumerate(lines):
-            if 'ATOMIC_POSITIONS' in line:
-                atomic_positions_line = n
-                break
+            with open('espresso.pwi', 'rU') as g:
+                lines = g.readlines()
 
-        if i == 0:
-            for line in lines[:n]:
+            for n, line in enumerate(lines):
+                if 'ATOMIC_POSITIONS' in line:
+                    break
+
+            if i == 0:
+                for line in lines[:n]:
+                    f.write(line)
+                f.write('BEGIN_POSITIONS\n')
+                f.write('FIRST_IMAGE\n')
+            elif i == len(images)-1:
+                f.write('LAST_IMAGE\n')
+            else:
+                f.write('INTERMEDIATE_IMAGE\n')
+
+            for line in lines[n:]:
                 f.write(line)
-            f.write('BEGIN_POSITIONS\n')
-            f.write('FIRST_IMAGE\n')
-        elif i == len(images)-1:
-            f.write('LAST_IMAGE\n')
-        else:
-            f.write('INTERMEDIATE_IMAGE\n')
 
-        for line in lines[n:]:
-            f.write(line)
+        os.remove('espresso.pwi')
 
-    os.remove('espresso.pwi')
-
-    f.write('END_POSITIONS\n')
-    f.write('END_ENGINE_INPUT\n')
-    f.write('END\n')
-
-    f.close()
+        f.write('END_POSITIONS\n')
+        f.write('END_ENGINE_INPUT\n')
+        f.write('END\n')
 
 ################################################################################
 # READ NEB CRD
@@ -474,15 +476,13 @@ def write_neb_inp(input_data_neb, images, calc, filename = 'neb.inp'):
 
 def read_neb_crd(images, filename = 'pwscf.crd'):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
-
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
+    
     n_atoms = len(images[0])
-    n_images = len(images)
 
     num = 2
-    for i, image in enumerate(images):
+    for image in images:
         positions = []
         for line in lines[num:num+n_atoms]:
             positions.append(line.split()[1:4])
@@ -497,31 +497,32 @@ def read_neb_crd(images, filename = 'pwscf.crd'):
 
 def update_pseudos(pseudos, filename):
 
-    input_data, pseudos_new, kpts, koffset = read_qe_inp(filename)
+    _, pseudos_new, _, _ = read_qe_inp(filename)
+    pseudos.copy()
+    pseudos.update(pseudos_new)
     
-    return dict(pseudos.items() + pseudos_new.items())
+    return pseudos
 
 ################################################################################
 # READ PW BANDS
 ################################################################################
 
-def read_pw_bands(filename = 'pw.out', scale_band_energies = True):
+def read_pw_bands(filename = 'pw.pwo', scale_band_energies = True):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     kpt = 0
-    e_bands_dict = OrderedDict()
+    e_bands_dict = {}
     n_kpts = 0
     kpts_list = []
     n_spin = 1
     read_bands = False
 
-    for n, line in enumerate(lines):
+    for line in lines:
         if 'End of self-consistent calculation' in line:
             kpt = 0
-            e_bands_dict = OrderedDict()
+            e_bands_dict = {}
             kpts_list = []
         if 'number of k points' in line:
             n_kpts = int(line.split()[4])
@@ -535,7 +536,9 @@ def read_pw_bands(filename = 'pw.out', scale_band_energies = True):
             kpts_list += [kpt]
         if read_bands is True:
             if count == 1:
-                e_bands_dict[kpt] += [float(b) for b in line.split()]
+                for i in range(8):
+                    if len(line) > 9*(i+1)+2:
+                        e_bands_dict[kpt] += [float(line[9*i+2:9*(i+1)+2])]
             if len(line.strip()) == 0 or line == '\n':
                 count += 1
         if 'the Fermi energy is' in line:
@@ -543,14 +546,11 @@ def read_pw_bands(filename = 'pw.out', scale_band_energies = True):
 
     n_kpts *= n_spin
 
-    assert n_kpts == kpts_list[-1]
+    #assert n_kpts == kpts_list[-1]
 
     if scale_band_energies is True:
-
         for kpt in e_bands_dict:
-
             for i in range(len(e_bands_dict[kpt])):
-
                 e_bands_dict[kpt][i] -= e_fermi
 
     return e_bands_dict, e_fermi
@@ -564,16 +564,13 @@ def create_pp_inp(outname = 'pw.out', band_num = 'homo', datname = 'charge',
                   kpts = None, print_summ = False):
 
     e_bands_dict, e_fermi = read_pw_bands(filename = outname)
-
     kpts_list = [kpt for kpt in e_bands_dict]
-
     n_bands = max([len(e_bands_dict[kpt]) for kpt in e_bands_dict])
 
     if kpts is not None:
         kpts_list = kpts
 
     n_kpts = len(kpts_list)
-
     n_min = n_bands
     n_max = 0
 
@@ -619,7 +616,6 @@ def create_pp_inp(outname = 'pw.out', band_num = 'homo', datname = 'charge',
                    filename  = 'pp.inp' )
 
     if print_summ is True:
-
         print('number of bands = {}\n'.format(n_bands))
 
 ################################################################################
@@ -630,48 +626,39 @@ def merge_charge_files(files_in, file_out):
 
     for num, filename in enumerate(files_in):
 
-        fileobj = open(filename, 'rU')
-        lines = fileobj.readlines()
-        fileobj.close()
+        with open(filename, 'rU') as fileobj:
+            lines = fileobj.readlines()
 
         if num == 0:
-
             new_lines = cp.deepcopy(lines)
-
             for n, line in enumerate(lines):
                 if 'BEGIN_BLOCK_DATAGRID_3D' in line:
                     n_den = n
                 if 'END_DATAGRID_3D' in line:
                     n_end = n
-
             n_grid = [int(n) for n in lines[n_den+3].split()]
             n_points = n_grid[0]*n_grid[1]*n_grid[2]
-
             density = np.zeros(n_points)
 
         i = 0
         for line in lines[n_den+8:n_end]:
-
             for l in line.split():
-
                 density[i] += float(l)
                 i += 1
 
-    f = open(file_out, 'w+')
+    with open(file_out, 'w+') as f:
 
-    for line in new_lines[:n_den+8]:
-        f.write(line)
+        for line in new_lines[:n_den+8]:
+            f.write(line)
 
-    for i in range(n_points):
-        if i != 0 and i % 6 == 0:
-            f.write('\n')
-        f.write('{:14.6E}'.format(density[i]))
+        for i in range(n_points):
+            if i != 0 and i % 6 == 0:
+                f.write('\n')
+            f.write('{:14.6E}'.format(density[i]))
 
-    f.write('\n')
-    for line in new_lines[n_end:]:
-        f.write(line)
-
-    f.close()
+        f.write('\n')
+        for line in new_lines[n_end:]:
+            f.write(line)
 
 ################################################################################
 # CLASS STATE
@@ -695,11 +682,9 @@ class State:
             self.orbital = 's'
 
         elif l == 1:
-
             self.orbital = p_dict[self.m]
 
         elif l == 2:
-
             self.orbital = d_dict[self.m]
 
 ################################################################################
@@ -735,91 +720,72 @@ class AtomPP:
 # READ PROJWFC
 ################################################################################
 
-def read_projwfc(filename, kpoint):
+def read_projwfc(filename, kpoint, print_summary = False):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     states_list = []
     bands_list = []
 
     read = False
-
     kpt = 0
     band_num = 0
 
     for line in lines:
 
         if 'state #' in line:
-
             state_num = int(line[12:16])
             atom_num = int(line[22:26])
             element = line[28:30].strip()
             shell_num = int(line[38:40])
             l = int(line[44:45])
             m = int(line[48:50])
-
             state = State(state_num = state_num,
                           atom_num  = atom_num ,
                           element   = element  ,
                           shell_num = shell_num,
                           l         = l        ,
                           m         = m        )
-
             states_list += [state]
 
         if ' k = ' in line:
             kpt += 1
 
         if kpoint == kpt:
-
             if '    |psi|^2' in line:
-
                 read = False
-
                 band = Band(band_num   = band_num  ,
                             energy     = energy    ,
                             state_nums = state_nums,
                             weights    = weights   )
-
                 bands_list += [band]
 
             if read is True:
-
                 for i in range(5):
-
                     weight = line[11+14*i:16+14*i]
                     state_num = line[19+14*i:23+14*i]
-
                     try:
-
                         weights += [float(weight)]
                         state_nums += [int(state_num)]
-
                     except: pass
 
-
             if '==== e(' in line:
-
                 read = True
-
                 band_num = int(line[7:11])
                 energy = float(line[14:26])
                 weights = []
                 state_nums = []
 
             if '     e =' in line:
-
                 read = True
-
                 band_num += 1
                 energy = float(line[8:20])
                 weights = []
                 state_nums = []
 
-    print('n states = {0} - n bands = {1}'.format(len(states_list),
-                                                  len(bands_list)))
+    if print_summary is True:
+        print(f'n states = {len(states_list)} - n bands = {len(bands_list)}')
 
     return states_list, bands_list
 
@@ -830,7 +796,6 @@ def read_projwfc(filename, kpoint):
 def scale_band_energies(band_list, e_fermi):
 
     for band in band_list:
-
         band.energy -= e_fermi
 
     return band_list
@@ -839,7 +804,7 @@ def scale_band_energies(band_list, e_fermi):
 # GET ATOMS DETAILS
 ################################################################################
 
-def get_atoms_details(states_list, bands_list, atom_num_list, delta_e,
+def get_atoms_details(states_list, bands_list, atom_num_list, delta_e = 0.,
                       color_dict = None):
 
     atoms_pp_list = []
@@ -847,9 +812,7 @@ def get_atoms_details(states_list, bands_list, atom_num_list, delta_e,
     for atom_num in atom_num_list:
 
         states = [s for s in states_list if s.atom_num == atom_num]
-
         element = states[0].element
-
         color = color_dict[element] if color_dict is not None else None
 
         atom = AtomPP(atom_num = atom_num,
@@ -858,21 +821,14 @@ def get_atoms_details(states_list, bands_list, atom_num_list, delta_e,
                       bands    = []      ,
                       weights  = []      ,
                       color    = color   )
-
         atoms_pp_list += [atom]
 
         for band in bands_list:
-
             for state in states:
-
                 if state.state_num in band.state_nums:
-
                     index = band.state_nums.index(state.state_num)
-
                     weight = band.weights[index]
-
                     if weight > delta_e:
-
                         atom.states += [state]
                         atom.bands += [band]
                         atom.weights += [weight]
@@ -887,7 +843,7 @@ def print_atoms_details(atoms_pp_list, filename = 'atom_details.out'):
 
     fileobj = open(filename, 'w+')
 
-    count_bands = OrderedDict()
+    count_bands = {}
 
     for atom in atoms_pp_list:
 
@@ -995,9 +951,8 @@ def plot_band_levels(atoms_pp_list, num_min_print, bands_energies,
 
 def get_pdos(filename, e_fermi):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     if 'dosup(E)' in lines[0] or 'ldosup(E)' in lines[0]:
         nspin = 2
@@ -1005,25 +960,20 @@ def get_pdos(filename, e_fermi):
         nspin = 1
 
     energy = np.zeros(len(lines)-1)
-
     if nspin == 2:
-        dos = np.zeros((len(lines)-1, 2))
+        pdos = np.zeros((len(lines)-1, 2))
     else:
-        dos = np.zeros(len(lines)-1)
+        pdos = np.zeros(len(lines)-1)
 
-    for i in range(1, len(lines)-1):
-
-        line = lines[i]
+    for i, line in enumerate(lines[1:]):
         energy[i] = float(line.split()[0])-e_fermi
-
         if nspin == 2:
-            dos[i, 0] = float(line.split()[1])
-            dos[i, 1] = float(line.split()[2])
-            print(line.split()[1])
+            pdos[i, 0] = float(line.split()[1])
+            pdos[i, 1] = float(line.split()[2])
         else:
-            dos[i] = float(line.split()[1])
+            pdos[i] = float(line.split()[1])
 
-    return energy, dos
+    return energy, pdos
 
 ################################################################################
 # GET DOS
@@ -1031,9 +981,8 @@ def get_pdos(filename, e_fermi):
 
 def get_dos(filename):
 
-    fileobj = open(filename, 'rU')
-    lines = fileobj.readlines()
-    fileobj.close()
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
 
     if 'dosup(E)' in lines[0]:
         nspin = 2
@@ -1041,19 +990,14 @@ def get_dos(filename):
         nspin = 1
 
     energy = np.zeros(len(lines)-1)
-
     if nspin == 2:
         dos = np.zeros((len(lines)-1, 2))
     else:
         dos = np.zeros(len(lines)-1)
 
     e_fermi = float(lines[0].split()[-2])
-
-    for i in range(1, len(lines)-1):
-
-        line = lines[i]
+    for i, line in enumerate(lines[1:]):
         energy[i] = float(line.split()[0])-e_fermi
-
         if nspin == 2:
             dos[i, 0] = float(line.split()[1])
             dos[i, 1] = float(line.split()[2])
@@ -1069,17 +1013,11 @@ def get_dos(filename):
 def assign_hubbard_U(atoms, pw_data, hubbard_U_dict, hubbard_J0_dict = None):
 
     symbols_list = get_symbols_list(atoms)
-
     for i in range(len(symbols_list)):
-
         symbol = symbols_list[i]
-
         pw_data['Hubbard_U({})'.format(i+1)] = hubbard_U_dict[symbol]
-
         if hubbard_J0_dict is not None:
-
             pw_data['Hubbard_J0({})'.format(i+1)] = hubbard_J0_dict[symbol]
-
     pw_data['lda_plus_u'] = True
 
     return pw_data
@@ -1090,29 +1028,20 @@ def assign_hubbard_U(atoms, pw_data, hubbard_U_dict, hubbard_J0_dict = None):
 
 def assign_init_charges(atoms, pw_data, init_charges_dict):
 
-    tot_charge = 0.
-
     symbols_list = get_symbols_list(atoms)
     symbols_dict = get_symbols_dict(atoms)
 
     i = 0
-
     charge_dict = {}
-
+    tot_charge = 0.
     for symbol in symbols_list:
-
         charge = init_charges_dict[symbol]
-
         if charge != 0.:
-
             charge_dict['starting_charge({})'.format(i+1)] = charge
-
             tot_charge += symbols_dict[symbol]*charge
-
         i += 1
 
     pw_data['tot_charge'] = tot_charge
-
     if 'system' in pw_data:
         pw_data['system'].update(charge_dict)
     else:
@@ -1127,73 +1056,52 @@ def assign_init_charges(atoms, pw_data, init_charges_dict):
 def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
 
     cell_zero = atoms.get_cell()
-
     x = 1.-delta_x
-    
     for i in range(npoints):
     
         dirname = 'volumes_{:02d}'.format(i)
-    
         try: os.mkdir(dirname)
         except: pass
     
         os.chdir(dirname)
-    
         v = x**(1./3.)
-    
         atoms.set_cell(v*cell_zero, scale_atoms = True)
-    
         calc = atoms.get_calculator()
-        
         calc.write_input(atoms)
-        os.rename('espresso.pwi', 'pw.inp')
-    
         x += (2.*delta_x)/(npoints-1)
-    
         if run_cmd is not None:
             os.system(run_cmd)
-    
         os.chdir('..')
 
 ################################################################################
 # READ EOS OUTPUTS
 ################################################################################
 
-def read_eos_outputs(npoints, filename = 'pw.out', get_cells = False):
+def read_eos_outputs(npoints, filename = 'pw.pwo', get_cells = False):
 
     volumes  = []
     energies = []
-    cells = []
+    cells    = []
     
     for i in range(npoints):
     
         dirname = 'volumes_{:02d}'.format(i)
     
         os.chdir(dirname)
-    
         atoms = read_qe_out(filename)
-    
         cells.append(atoms.cell)
         volumes.append(atoms.get_volume())
         energies.append(atoms.potential_energy)
-    
         os.chdir('..')
 
-    f = open('volumes_energies.txt', 'w+')
-
-    f.write('volumes     energies\n')
-
-    for i in range(len(volumes)):
-        f.write('{0:10.7f}  {1:14.7f}\n'.format(volumes[i], energies[i]))
-
-    f.close()
+    with open('volumes_energies.txt', 'w+') as f:
+        f.write('volumes     energies\n')
+        for i in range(len(volumes)):
+            f.write('{0:10.7f}  {1:14.7f}\n'.format(volumes[i], energies[i]))
 
     if get_cells is True:
-
         return volumes, energies, cells
-
     else:
-
         return volumes, energies
 
 ################################################################################
@@ -1203,9 +1111,9 @@ def read_eos_outputs(npoints, filename = 'pw.out', get_cells = False):
 def reorder_neb_images(first, last):
 
     coupled = cp.deepcopy(last)
-    spared = [ a for a in last ]
+    spared = [a for a in last]
     
-    del coupled [ range(len(coupled)) ]
+    del coupled [range(len(coupled))]
     
     for a in first:
         distances = [10.]*len(last)
@@ -1224,7 +1132,7 @@ def reorder_neb_images(first, last):
             spared[index] = None
     
     spared = Atoms([a for a in spared if a is not None])
-    last = coupled + spared
+    last = coupled+spared
 
     return first, last
 
@@ -1235,9 +1143,7 @@ def reorder_neb_images(first, last):
 def get_number_of_electrons(atoms):
 
     n_electrons = 0
-
     for a in atoms:
-        
         n_electrons += SSSP_VALENCE[atomic_numbers[a.symbol]]
 
     return n_electrons
@@ -1269,59 +1175,43 @@ def write_qe_input_block(fileobj, block_name, block_data, col = 23):
 # WRITE DOS INPUT
 ################################################################################
 
-def write_dos_input(dos_data, filename = 'dos.inp', col = 23):
+def write_dos_input(dos_data, filename = 'dos.pwi', col = 23):
 
-    fileobj = open(filename, 'w+')
-
-    block_name = 'DOS'
-
-    write_qe_input_block(fileobj    = fileobj   ,
-                         block_name = block_name,
-                         block_data = dos_data  ,
-                         col        = col       )
-
-    fileobj.close()
+    with open(filename, 'w+') as fileobj:
+        write_qe_input_block(fileobj    = fileobj   ,
+                             block_name = 'DOS'     ,
+                             block_data = dos_data  ,
+                             col        = col       )
 
 ################################################################################
 # WRITE PP INPUT
 ################################################################################
 
-def write_pp_input(pp_data, plot_data, filename = 'pp.inp', col = 23):
+def write_pp_input(pp_data, plot_data, filename = 'pp.pwi', col = 23):
 
-    fileobj = open(filename, 'w+')
+    with open(filename, 'w+') as fileobj:
+    
+        write_qe_input_block(fileobj    = fileobj   ,
+                             block_name = 'INPUTPP' ,
+                             block_data = pp_data   ,
+                             col        = col       )
 
-    block_name = 'INPUTPP'
-
-    write_qe_input_block(fileobj    = fileobj   ,
-                         block_name = block_name,
-                         block_data = pp_data   ,
-                         col        = col       )
-
-    block_name = 'PLOT'
-
-    write_qe_input_block(fileobj    = fileobj   ,
-                         block_name = block_name,
-                         block_data = plot_data ,
-                         col        = col       )
-
-    fileobj.close()
+        write_qe_input_block(fileobj    = fileobj   ,
+                             block_name = 'PLOT'    ,
+                             block_data = plot_data ,
+                             col        = col       )
 
 ################################################################################
 # WRITE PROJWFC INPUT
 ################################################################################
 
-def write_projwfc_input(proj_data, filename = 'projwfc.inp', col = 23):
+def write_projwfc_input(proj_data, filename = 'projwfc.pwi', col = 23):
 
-    fileobj = open(filename, 'w+')
-
-    block_name = 'PROJWFC'
-
-    write_qe_input_block(fileobj    = fileobj   ,
-                         block_name = block_name,
-                         block_data = proj_data ,
-                         col        = col       )
-
-    fileobj.close()
+    with open(filename, 'w+') as fileobj:
+        write_qe_input_block(fileobj    = fileobj   ,
+                             block_name = 'PROJWFC' ,
+                             block_data = proj_data ,
+                             col        = col       )
 
 ################################################################################
 # WRITE DOS INPUT

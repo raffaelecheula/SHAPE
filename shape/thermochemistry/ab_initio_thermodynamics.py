@@ -1,5 +1,5 @@
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
+# Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
 import numpy as np
