@@ -423,7 +423,7 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 # WRITE NEB INP
 ################################################################################
 
-def write_neb_inp(input_data_neb, images, calc, filename = 'neb.inp'):
+def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
 
     calc = cp.deepcopy(calc)
 
@@ -557,9 +557,16 @@ def read_pw_bands(filename = 'pw.pwo', scale_band_energies = True):
 # CREATE PP_INP
 ################################################################################
 
-def create_pp_inp(outname = 'pw.out', band_num = 'homo', datname = 'charge',
-                  pp_data = {}, plot_data = {}, delta_e = 0.001,
-                  kpts = None, print_summ = False):
+def create_pp_inp(filename   = 'pp.pwi',
+                  outname    = 'pw.pwo',
+                  band_num   = 'homo',
+                  datname    = 'charge',
+                  pp_data    = {},
+                  plot_data  = {},
+                  delta_e    = 0.001,
+                  kpts       = None,
+                  print_summ = False,
+                  ):
 
     e_bands_dict, e_fermi = read_pw_bands(filename = outname)
     kpts_list = [kpt for kpt in e_bands_dict]
@@ -611,7 +618,7 @@ def create_pp_inp(outname = 'pw.out', band_num = 'homo', datname = 'charge',
 
     write_pp_input(pp_data   = pp_data  ,
                    plot_data = plot_data,
-                   filename  = 'pp.inp' )
+                   filename  = filename )
 
     if print_summ is True:
         print('number of bands = {}\n'.format(n_bands))
@@ -704,8 +711,14 @@ class Band:
 
 class AtomPP:
 
-    def __init__(self, atom_num,  element, states = [], bands = [],
-                 weights = [], color = None):
+    def __init__(self,
+                 atom_num, 
+                 element,
+                 states  = [],
+                 bands   = [],
+                 weights = [],
+                 color   = None,
+                 ):
 
         self.atom_num = atom_num
         self.element  = element
@@ -802,8 +815,12 @@ def scale_band_energies(band_list, e_fermi):
 # GET ATOMS DETAILS
 ################################################################################
 
-def get_atoms_details(states_list, bands_list, atom_num_list, delta_e = 0.,
-                      color_dict = None):
+def get_atoms_details(states_list,
+                      bands_list,
+                      atom_num_list,
+                      delta_e    = 0.,
+                      color_dict = None,
+                      ):
 
     atoms_pp_list = []
     
@@ -894,8 +911,12 @@ def print_atoms_details(atoms_pp_list, filename = 'atom_details.out'):
 # PLOT ENERGY LEVELS
 ################################################################################
 
-def plot_band_levels(atoms_pp_list, num_min_print, bands_energies,
-                     e_min, e_max):
+def plot_band_levels(atoms_pp_list,
+                     num_min_print,
+                     bands_energies,
+                     e_min,
+                     e_max,
+                     ):
 
     import matplotlib.pyplot as plt
 
@@ -1039,8 +1060,12 @@ def get_pdos_vect(atoms, e_fermi, filename = 'projwfc.pwo'):
 # GET FEATURES BANDS
 ################################################################################
 
-def get_features_bands(atoms, energy, pdos_vect, delta_e = 0.1, 
-                       save_pickle = True):
+def get_features_bands(atoms, 
+                       energy,
+                       pdos_vect,
+                       delta_e     = 0.1, 
+                       save_pickle = True,
+                       ):
 
     i_zero = np.argmin(np.abs(energy))
     i_minus = np.argmin(np.abs(energy+delta_e))
@@ -1329,8 +1354,13 @@ def write_projwfc_input(proj_data, filename = 'projwfc.pwi', col = 23):
 # WRITE DOS INPUT
 ################################################################################
 
-def write_environ_input(env_dict, bon_dict, ele_dict, filename = 'environ.in',
-                        reg_list = [], col = 23):
+def write_environ_input(env_dict,
+                        bon_dict,
+                        ele_dict,
+                        filename = 'environ.in',
+                        reg_list = [],
+                        col      = 23,
+                        ):
 
     fileobj = open(filename, 'w+')
 
