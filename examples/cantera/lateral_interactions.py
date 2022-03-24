@@ -1,10 +1,7 @@
-#!/usr/bin/env python3.5
-
 ################################################################################
-# Raffaele Cheula, LCCP, Politecnico di Milano, raffaele.cheula@polimi.it
+# Raffaele Cheula, LCCP, Politecnico di Milano, cheula.raffaele@gmail.com
 ################################################################################
 
-from __future__ import absolute_import, division, print_function
 from shape.units import *
 
 ################################################################################
@@ -578,16 +575,6 @@ lat_dict['int'] += [LateralInteraction(ads_name = 'OCH(int)',
                                        cov_dep  = 'CO(int)',
                                        coeffs   = [2.83, -1.10],
                                        units    = eV/molecule)]
-
-################################################################################
-# PRINT LATERAL INTERACTIONS
-################################################################################
-
-#for facet in lat_dict:
-#    print('')
-#    print(facet)
-#    for lat in lat_dict[facet]:
-#        print('{0} {1}'.format(*lat.coeffs))
 
 ################################################################################
 # END

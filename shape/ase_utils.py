@@ -278,5 +278,22 @@ def get_moments_of_inertia_xyz(atoms, center = None):
     return I
 
 ################################################################################
+# CONVERT MILLER INDEX
+################################################################################
+
+def convert_miller_index(miller_index):
+
+    if isinstance(miller_index, str):
+        miller_index = list(miller_index)
+        for i in range(len(miller_index)):
+            miller_index[i] = int(miller_index[i])
+        miller_index = tuple(miller_index)
+    
+    elif isinstance(miller_index, list):
+        miller_index = tuple(miller_index)
+
+    return miller_index
+
+################################################################################
 # END
 ################################################################################
