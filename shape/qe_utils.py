@@ -2,7 +2,10 @@
 # Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
-import ast, re, os
+import ast
+import re
+import os
+import pickle
 import numpy as np
 import copy as cp
 from ase import Atoms
@@ -188,10 +191,11 @@ class ReadQeOut:
         self.atoms            = None
         self.potential_energy = None
 
-    def get_atoms(self):
+    def get_atoms(self, cell = None):
 
         atoms = read_qe_out(self.filename)
-
+        if cell is not None:
+            atoms.set_cell(cell)
         self.atoms = atoms
 
         return atoms
@@ -421,7 +425,7 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 
 def write_neb_inp(input_data_neb, images, calc, filename = 'neb.inp'):
 
-    calc = calc.copy()
+    calc = cp.deepcopy(calc)
 
     with open(filename, 'w+') as f:
         f.write('BEGIN\n')
@@ -940,6 +944,37 @@ def plot_band_levels(atoms_pp_list, num_min_print, bands_energies,
     return fig
 
 ################################################################################
+# GET DOS
+################################################################################
+
+def get_dos(filename):
+
+    with open(filename, 'rU') as fileobj:
+        lines = fileobj.readlines()
+
+    if 'dosup(E)' in lines[0]:
+        nspin = 2
+    else:
+        nspin = 1
+
+    energy = np.zeros(len(lines)-1)
+    if nspin == 2:
+        dos = np.zeros((len(lines)-1, 2))
+    else:
+        dos = np.zeros(len(lines)-1)
+
+    e_fermi = float(lines[0].split()[-2])
+    for i, line in enumerate(lines[1:]):
+        energy[i] = float(line.split()[0])-e_fermi
+        if nspin == 2:
+            dos[i, 0] = float(line.split()[1])
+            dos[i, 1] = float(line.split()[2])
+        else:
+            dos[i] = float(line.split()[1])
+
+    return energy, dos
+
+################################################################################
 # GET PDOS
 ################################################################################
 
@@ -970,35 +1005,118 @@ def get_pdos(filename, e_fermi):
     return energy, pdos
 
 ################################################################################
-# GET DOS
+# GET PDOS VECT
 ################################################################################
 
-def get_dos(filename):
+def get_pdos_vect(atoms, e_fermi, filename = 'projwfc.pwo'):
 
-    with open(filename, 'rU') as fileobj:
-        lines = fileobj.readlines()
+    states_list, _ = read_projwfc(filename = filename,
+                                  kpoint   = None    )
 
-    if 'dosup(E)' in lines[0]:
-        nspin = 2
-    else:
-        nspin = 1
+    pdos_vect = np.array([None]*len(atoms), dtype = object)
+    names_list = []
+    for state in states_list:
+        atom_num = state.atom_num
+        orbital_type = state.orbital[:1]
+        name = 'pdos.pdos_atm#{0}({1})_wfc#{2}({3})'.format(atom_num       ,
+                                                            state.element  ,
+                                                            state.shell_num,
+                                                            orbital_type   )
+        if name not in names_list:
+            names_list += [name]
+            energy, pdos = get_pdos(filename = name   ,
+                                    e_fermi  = e_fermi)
+            if pdos_vect[atom_num-1] is None:
+                pdos_vect[atom_num-1] = {}
+            if orbital_type in pdos_vect[atom_num-1]:
+                pdos_vect[atom_num-1][orbital_type] += pdos
+            else:
+                pdos_vect[atom_num-1][orbital_type] = pdos
 
-    energy = np.zeros(len(lines)-1)
-    if nspin == 2:
-        dos = np.zeros((len(lines)-1, 2))
-    else:
-        dos = np.zeros(len(lines)-1)
+    return energy, pdos_vect
 
-    e_fermi = float(lines[0].split()[-2])
-    for i, line in enumerate(lines[1:]):
-        energy[i] = float(line.split()[0])-e_fermi
-        if nspin == 2:
-            dos[i, 0] = float(line.split()[1])
-            dos[i, 1] = float(line.split()[2])
+################################################################################
+# GET FEATURES BANDS
+################################################################################
+
+def get_features_bands(atoms, energy, pdos_vect, delta_e = 0.1, 
+                       save_pickle = True):
+
+    i_zero = np.argmin(np.abs(energy))
+    i_minus = np.argmin(np.abs(energy+delta_e))
+    i_plus = np.argmin(np.abs(energy-delta_e))
+
+    features = np.zeros((len(atoms),8))
+
+    for i, _ in enumerate(atoms):
+        pdos_dict = pdos_vect[i]
+        for orbital in pdos_dict:
+            if len(pdos_dict[orbital].shape) > 1:
+                pdos_dict[orbital] = np.sum(pdos_dict[orbital], axis = 1)
+        
+        pdos_sp = pdos_dict['s']
+        pdos_sp += pdos_dict['p']
+        pdos_sp = pdos_dict['p']
+        sp_filling = np.trapz(y = pdos_sp[:i_zero], x = energy[:i_zero])
+        sp_density = (np.sum(pdos_sp[i_minus:i_plus]) /
+                      len(pdos_sp[i_minus:i_plus]))
+        
+        if 'd' in pdos_dict:
+            pdos_d = pdos_dict['d']
+            d_filling = np.trapz(y = pdos_d[:i_zero], x = energy[:i_zero])
+            d_density = (np.sum(pdos_d[i_minus:i_plus]) / 
+                         len(pdos_d[i_minus:i_plus]))
+            d_centre = np.trapz(pdos_d*energy, energy)/np.trapz(pdos_d, energy)
+            d_mom_2 = (np.trapz(pdos_d*np.power(energy-d_centre,2), energy) / 
+                       np.trapz(pdos_d, energy))
+            d_width = np.sqrt(d_mom_2)
+            d_mom_3 = (np.trapz(pdos_d*np.power(energy-d_centre,3), energy) / 
+                       np.trapz(pdos_d, energy))
+            d_skewness = d_mom_3/np.power(d_width,3)
+            d_mom_4 = (np.trapz(pdos_d*np.power(energy-d_centre,4), energy) / 
+                       np.trapz(pdos_d, energy))
+            d_kurtosis = d_mom_4/np.power(d_width,4)
         else:
-            dos[i] = float(line.split()[1])
+            d_filling  = np.nan
+            d_density  = np.nan
+            d_centre   = np.nan
+            d_width    = np.nan
+            d_skewness = np.nan
+            d_kurtosis = np.nan
+        
+        features[i,0] = d_filling
+        features[i,1] = d_centre
+        features[i,2] = d_width
+        features[i,3] = d_skewness
+        features[i,4] = d_kurtosis
+        features[i,5] = sp_filling
+        features[i,6] = d_density
+        features[i,7] = sp_density
+        
+        if save_pickle is True:
+            with open('features_bands.pickle', 'wb') as fileobj:
+                pickle.dump(features, fileobj)
 
-    return energy, dos
+    return features
+
+################################################################################
+# WRITE FEATURES OUT
+################################################################################
+
+def write_features_out(atoms, features_names, features, filename):
+
+    with open(filename, 'w+') as fileobj:
+        print("Calculated Features", file=fileobj)
+        assert len(features_names) == features.shape[1]
+        print(f'{"symbol":7s}', end='', file=fileobj)
+        for i in range(features.shape[1]):
+            print(f'  {features_names[i]:11s}', end='', file=fileobj)
+        print('', file=fileobj)
+        for i in range(features.shape[0]):
+            print(f'{atoms[i].symbol:7s}', end='', file=fileobj)
+            for feature in features[i,:]:
+                print(f'{feature:+13.4e}', end='', file=fileobj)
+            print('', file=fileobj)
 
 ################################################################################
 # ASSIGN HUBBARD U
