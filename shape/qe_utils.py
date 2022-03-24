@@ -426,6 +426,7 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
 
     calc = cp.deepcopy(calc)
+    calc.label = 'tmp'
 
     with open(filename, 'w+') as f:
         f.write('BEGIN\n')
@@ -442,7 +443,7 @@ def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
 
             calc.write_input(images[i])
 
-            with open('espresso.pwi', 'rU') as g:
+            with open('tmp.pwi', 'rU') as g:
                 lines = g.readlines()
 
             for n, line in enumerate(lines):
@@ -462,7 +463,7 @@ def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
             for line in lines[n:]:
                 f.write(line)
 
-        os.remove('espresso.pwi')
+        os.remove('tmp.pwi')
 
         f.write('END_POSITIONS\n')
         f.write('END_ENGINE_INPUT\n')
