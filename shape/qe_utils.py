@@ -379,7 +379,7 @@ class ReadQeInp:
 # WRITE NEB DAT
 ################################################################################
 
-def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
+def write_neb_dat(neb_data, filename = 'neb.dat', mode = 'w+'):
 
     neb_dict = {
         'string_method'        : None,
@@ -403,8 +403,8 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
         'fcp_tot_charge_last'  : None,
     }
 
-    for arg in input_data_neb:
-        neb_dict[arg] = input_data_neb[arg]
+    for arg in neb_data:
+        neb_dict[arg] = neb_data[arg]
 
     with open(filename, mode) as f:
 
@@ -423,7 +423,7 @@ def write_neb_dat(input_data_neb, filename = 'neb.dat', mode = 'w+'):
 # WRITE NEB INP
 ################################################################################
 
-def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
+def write_neb_inp(neb_data, images, calc, filename = 'neb.pwi'):
 
     calc = cp.deepcopy(calc)
     calc.label = 'tmp'
@@ -432,7 +432,7 @@ def write_neb_inp(input_data_neb, images, calc, filename = 'neb.pwi'):
         f.write('BEGIN\n')
         f.write('BEGIN_PATH_INPUT\n')
 
-    write_neb_dat(input_data_neb, filename, mode = 'a+')
+    write_neb_dat(neb_data, filename, mode = 'a+')
 
     with open(filename, 'a+') as f:
 
