@@ -1,0 +1,16 @@
+Metadata-Version: 1.2
+Name: SHAPE
+Version: 0.1.2
+Summary: Tools for structure-dependent microkinetic modelling.
+Home-page: https://github.com/raffaelecheula/SHAPE.git
+Author: Raffaele Cheula
+Author-email: cheula.raffaele@gmail.com
+License: GPL-3.0
+Description: # SHAPE
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Programming Language :: Python
+Requires-Python: >=3.5, <4
