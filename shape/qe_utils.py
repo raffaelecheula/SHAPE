@@ -13,6 +13,7 @@ from ase.io.espresso import SSSP_VALENCE
 from ase.data import atomic_numbers
 from ase.units import create_units
 from ase.constraints import FixAtoms, FixCartesian
+from ase.calculators.singlepoint import SinglePointDFTCalculator
 from ase.calculators.espresso import Espresso
 from shape.ase_utils import get_symbols_list, get_symbols_dict
 
@@ -171,11 +172,9 @@ def read_qe_out(filename):
 
     constraints.append(FixAtoms(indices = indices))
     atoms.set_constraint(constraints)
-    results = {'energy' : energy}
-    calc = Espresso()
-    calc.results = results
-    atoms.set_calculator(calc)
     atoms.potential_energy = energy
+    atoms.calc = SinglePointDFTCalculator(atoms)
+    atoms.calc.results.update({'energy' : energy})
 
     return atoms
 
@@ -487,6 +486,38 @@ def read_neb_crd(images, filename = 'pwscf.crd'):
             positions.append(line.split()[1:4])
         image.set_positions(positions)
         num += n_atoms+2
+
+    return images
+
+################################################################################
+# READ NEB PATH
+################################################################################
+
+def read_neb_path(images, filename = 'pwscf.path'):
+
+    units = create_units('2006')
+    n_atoms = len(images[0])
+
+    with open(filename, 'r') as fileobj:
+        lines = fileobj.readlines()
+    
+    indices = []
+    for i, line in enumerate(lines):
+        if "Image:" in line:
+            indices.append(i)
+        if "QUICK-MIN FIELDS" in line:
+            break
+    
+    for i, index in enumerate(indices):
+        energy = float(lines[index+1])*units['Hartree']
+        positions = []
+        for j in range(n_atoms):
+            positions.append([float(a)*units['Bohr'] 
+                              for a in lines[index+2+j].split()[:3]])
+        images[i].positions = positions
+        images[i].potential_energy = energy
+        images[i].calc = SinglePointDFTCalculator(images[i])
+        images[i].calc.results.update({'energy' : energy})
 
     return images
 

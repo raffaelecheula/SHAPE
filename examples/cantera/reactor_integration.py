@@ -166,7 +166,7 @@ fixed_shape   = False
 File with thermodynamic and kinetics parameters.
 """
 
-cti_file = 'WGS_on_Rh_HRHT.cti.cti'
+cti_file = 'WGS_on_Rh_HRHT.cti'
 
 ################################################################################
 # OPERATIVE CONDITIONS
