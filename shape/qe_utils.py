@@ -1222,6 +1222,7 @@ def assign_init_charges(atoms, pw_data, init_charges_dict):
 # CREATE EOS INPUTS
 ################################################################################
 
+"""
 def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
 
     cell_zero = atoms.get_cell()
@@ -1241,11 +1242,13 @@ def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
         if run_cmd is not None:
             os.system(run_cmd)
         os.chdir('..')
+"""
 
 ################################################################################
 # READ EOS OUTPUTS
 ################################################################################
 
+"""
 def read_eos_outputs(npoints, filename = 'pw.pwo', get_cells = False):
 
     volumes  = []
@@ -1272,11 +1275,13 @@ def read_eos_outputs(npoints, filename = 'pw.pwo', get_cells = False):
         return volumes, energies, cells
     else:
         return volumes, energies
+"""
 
 ################################################################################
 # REORDER NEB IMAGES
 ################################################################################
 
+"""
 def reorder_neb_images(first, last):
 
     coupled = cp.deepcopy(last)
@@ -1304,6 +1309,7 @@ def reorder_neb_images(first, last):
     last = coupled+spared
 
     return first, last
+"""
 
 ################################################################################
 # GET NUMBER OF ELECTRONS
@@ -1457,6 +1463,105 @@ class DielectricRegion:
         self.spread   = spread
         self.dim      = dim
         self.axis     = axis
+
+################################################################################
+# GET PSEUDOPOTENTIALS NAMES
+################################################################################
+
+def get_pseudopotentials_names(library = 'SSSP efficiency'):
+
+    if library == 'SSSP efficiency':
+        pseudopotentials = {
+            'Ag' : 'Ag_ONCV_PBE-1.0.oncvpsp.upf',
+            'Al' : 'Al.pbe-n-kjpaw_psl.1.0.0.UPF',
+            'Ar' : 'Ar_ONCV_PBE-1.1.oncvpsp.upf',
+            'As' : 'As.pbe-n-rrkjus_psl.0.2.UPF',
+            'Au' : 'Au_ONCV_PBE-1.0.oncvpsp.upf',
+            'B'  : 'b_pbe_v1.4.uspp.F.UPF',
+            'Ba' : 'Ba.pbe-spn-kjpaw_psl.1.0.0.UPF',
+            'Be' : 'be_pbe_v1.4.uspp.F.UPF',
+            'Bi' : 'Bi_pbe_v1.uspp.F.UPF',
+            'Br' : 'br_pbe_v1.4.uspp.F.UPF',
+            'C'  : 'C.pbe-n-kjpaw_psl.1.0.0.UPF',
+            'Ca' : 'Ca_pbe_v1.uspp.F.UPF',
+            'Cd' : 'Cd.pbe-dn-rrkjus_psl.0.3.1.UPF',
+            'Ce' : 'Ce.GGA-PBE-paw-v1.0.UPF',
+            'Cl' : 'cl_pbe_v1.4.uspp.F.UPF',
+            'Co' : 'Co_pbe_v1.2.uspp.F.UPF',
+            'Cr' : 'cr_pbe_v1.5.uspp.F.UPF',
+            'Cs' : 'Cs_pbe_v1.uspp.F.UPF',
+            'Cu' : 'Cu_pbe_v1.2.uspp.F.UPF',
+            'Dy' : 'Dy.GGA-PBE-paw-v1.0.UPF',
+            'Er' : 'Er.GGA-PBE-paw-v1.0.UPF',
+            'Eu' : 'Eu.GGA-PBE-paw-v1.0.UPF',
+            'F'  : 'f_pbe_v1.4.uspp.F.UPF',
+            'Fe' : 'Fe.pbe-spn-kjpaw_psl.0.2.1.UPF',
+            'Ga' : 'Ga.pbe-dn-kjpaw_psl.1.0.0.UPF',
+            'Gd' : 'Gd.GGA-PBE-paw-v1.0.UPF',
+            'Ge' : 'ge_pbe_v1.4.uspp.F.UPF',
+            'H'  : 'H.pbe-rrkjus_psl.1.0.0.UPF',
+            'He' : 'He_ONCV_PBE-1.0.oncvpsp.upf',
+            'Hf' : 'Hf-sp.oncvpsp.upf',
+            'Hg' : 'Hg_ONCV_PBE-1.0.oncvpsp.upf',
+            'Ho' : 'Ho.GGA-PBE-paw-v1.0.UPF',
+            'I'  : 'I.pbe-n-kjpaw_psl.0.2.UPF',
+            'In' : 'In.pbe-dn-rrkjus_psl.0.2.2.UPF',
+            'Ir' : 'Ir_pbe_v1.2.uspp.F.UPF',
+            'K'  : 'K.pbe-spn-kjpaw_psl.1.0.0.UPF',
+            'Kr' : 'Kr_ONCV_PBE-1.0.oncvpsp.upf',
+            'La' : 'La.GGA-PBE-paw-v1.0.UPF',
+            'Li' : 'li_pbe_v1.4.uspp.F.UPF',
+            'Lu' : 'Lu.GGA-PBE-paw-v1.0.UPF',
+            'Mg' : 'Mg.pbe-n-kjpaw_psl.0.3.0.UPF',
+            'Mn' : 'mn_pbe_v1.5.uspp.F.UPF',
+            'Mo' : 'Mo_ONCV_PBE-1.0.oncvpsp.upf',
+            'N'  : 'N.pbe-n-radius_5.UPF',
+            'Na' : 'na_pbe_v1.5.uspp.F.UPF',
+            'Nb' : 'Nb.pbe-spn-kjpaw_psl.0.3.0.UPF',
+            'Nd' : 'Nd.GGA-PBE-paw-v1.0.UPF',
+            'Ne' : 'Ne_ONCV_PBE-1.0.oncvpsp.upf',
+            'Ni' : 'ni_pbe_v1.4.uspp.F.UPF',
+            'O'  : 'O.pbe-n-kjpaw_psl.0.1.UPF',
+            'Os' : 'Os_pbe_v1.2.uspp.F.UPF',
+            'P'  : 'P.pbe-n-rrkjus_psl.1.0.0.UPF',
+            'Pb' : 'Pb.pbe-dn-kjpaw_psl.0.2.2.UPF',
+            'Pd' : 'Pd_ONCV_PBE-1.0.oncvpsp.upf',
+            'Pm' : 'Pm.GGA-PBE-paw-v1.0.UPF',
+            'Po' : 'Po.pbe-dn-rrkjus_psl.1.0.0.UPF',
+            'Pr' : 'Pr.GGA-PBE-paw-v1.0.UPF',
+            'Pt' : 'pt_pbe_v1.4.uspp.F.UPF',
+            'Rb' : 'Rb_ONCV_PBE-1.0.oncvpsp.upf',
+            'Re' : 'Re_pbe_v1.2.uspp.F.UPF',
+            'Rh' : 'Rh_ONCV_PBE-1.0.oncvpsp.upf',
+            'Rn' : 'Rn.pbe-dn-kjpaw_psl.1.0.0.UPF',
+            'Ru' : 'Ru_ONCV_PBE-1.0.oncvpsp.upf',
+            'S'  : 's_pbe_v1.4.uspp.F.UPF',
+            'Sb' : 'sb_pbe_v1.4.uspp.F.UPF',
+            'Sc' : 'Sc_ONCV_PBE-1.0.oncvpsp.upf',
+            'Se' : 'Se_pbe_v1.uspp.F.UPF',
+            'Si' : 'Si.pbe-n-rrkjus_psl.1.0.0.UPF',
+            'Sm' : 'Sm.GGA-PBE-paw-v1.0.UPF',
+            'Sn' : 'Sn_pbe_v1.uspp.F.UPF',
+            'Sr' : 'Sr_pbe_v1.uspp.F.UPF',
+            'Ta' : 'Ta_pbe_v1.uspp.F.UPF',
+            'Tb' : 'Tb.GGA-PBE-paw-v1.0.UPF',
+            'Tc' : 'Tc_ONCV_PBE-1.0.oncvpsp.upf',
+            'Te' : 'Te_pbe_v1.uspp.F.UPF',
+            'Ti' : 'ti_pbe_v1.4.uspp.F.UPF',
+            'Tl' : 'Tl_pbe_v1.2.uspp.F.UPF',
+            'Tm' : 'Tm.GGA-PBE-paw-v1.0.UPF',
+            'V'  : 'v_pbe_v1.4.uspp.F.UPF',
+            'W'  : 'W_pbe_v1.2.uspp.F.UPF',
+            'Xe' : 'Xe_ONCV_PBE-1.1.oncvpsp.upf',
+            'Y'  : 'Y_pbe_v1.uspp.F.UPF',
+            'Yb' : 'Yb.GGA-PBE-paw-v1.0.UPF',
+            'Zn' : 'Zn_pbe_v1.uspp.F.UPF',
+            'Zr' : 'Zr_pbe_v1.uspp.F.UPF',
+        }
+    else:
+        raise NameError("implemented libraries: SSSP efficiency")
+    
+    return pseudopotentials
 
 ################################################################################
 # END
