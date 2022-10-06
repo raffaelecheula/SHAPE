@@ -2,6 +2,7 @@
 # Raffaele Cheula, cheula.raffaele@gmail.com
 ################################################################################
 
+import pickle
 import numpy as np
 from math import sin, pi, sqrt
 from ase import Atom, Atoms
@@ -310,6 +311,49 @@ def enlarge_structure(atoms_small, atoms_large, delta = 0.5):
             atoms_large += a_small
     
     return atoms_large
+
+################################################################################
+# GET DIMER ATOMS FROM NEB
+################################################################################
+
+def get_dimer_atoms_from_neb(images, index_ts = None):
+
+    if index_ts is None:
+        index_ts = np.argsort(
+            [atoms.get_potential_energy() for atoms in images]
+        )[-1]
+
+    atoms_dimer = images[index_ts].copy()
+    vector = np.zeros((len(atoms_dimer), 3))
+    if index_ts > 0:
+        vector += (
+            atoms_dimer.positions-images[index_ts-1].positions
+        )
+    if index_ts < len(images)-1:
+        vector += (
+            images[index_ts+1].positions-atoms_dimer.positions
+        )
+    vector /= np.linalg.norm(vector)
+    vector *= 0.01
+    
+    return atoms_dimer, vector
+
+################################################################################
+# WRITE DIMER PICKLE
+################################################################################
+
+def write_dimer_pickle(atoms, vector, calc, eigenmodes = None, 
+                       bond_indices = None, filename = 'dimer.pickle'):
+
+    param_dict = {
+        'atoms_dimer'  : atoms,
+        'eigenmodes'   : eigenmodes,
+        'vector'       : vector,
+        'calc'         : calc,
+        'bond_indices' : bond_indices,
+    }
+    with open(filename, 'wb') as fileobj:
+        pickle.dump(param_dict, fileobj)
 
 ################################################################################
 # END
