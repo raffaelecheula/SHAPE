@@ -295,5 +295,22 @@ def convert_miller_index(miller_index):
     return miller_index
 
 ################################################################################
+# ENLARGE STRUCTURE
+################################################################################
+
+def enlarge_structure(atoms_small, atoms_large, delta = 0.5):
+
+    for a_small in atoms_small:
+        match = False
+        for a_large in atoms_large:
+            if np.linalg.norm(a_large.position-a_small.position) < delta:
+                a_large.position = a_small.position
+                match = True
+        if match is False:
+            atoms_large += a_small
+    
+    return atoms_large
+
+################################################################################
 # END
 ################################################################################
