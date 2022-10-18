@@ -356,5 +356,18 @@ def write_dimer_pickle(atoms, vector, calc, eigenmodes = None,
         pickle.dump(param_dict, fileobj)
 
 ################################################################################
+# SWAP ATOMS
+################################################################################
+
+def swap_atoms(atoms, indices_swap):
+
+    indices = list(range(len(atoms)))
+    for ind in indices_swap:
+        indices[ind[0]], indices[ind[1]] = indices[ind[1]], indices[ind[0]]
+    atoms = atoms[indices]
+
+    return atoms
+
+################################################################################
 # END
 ################################################################################
