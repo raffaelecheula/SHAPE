@@ -346,7 +346,7 @@ def write_dimer_pickle(atoms, vector, calc, eigenmodes = None,
                        bond_indices = None, filename = 'dimer.pickle'):
 
     param_dict = {
-        'atoms_dimer'  : atoms,
+        'atoms'        : atoms,
         'eigenmodes'   : eigenmodes,
         'vector'       : vector,
         'calc'         : calc,
@@ -367,6 +367,54 @@ def swap_atoms(atoms, indices_swap):
     atoms = atoms[indices]
 
     return atoms
+
+################################################################################
+# REORDER ATOMS NEB
+################################################################################
+
+def reorder_atoms_neb(atoms_first, atoms_last):
+
+    # Calculate the distances from each atom in atoms_first to each atom
+    # in atoms_last. An infinite distance is assigned between atoms of
+    # different species.
+    n_atoms = len(atoms_first)
+    dist_matrix = np.zeros([n_atoms, n_atoms])
+    dist_argmin = np.zeros([n_atoms])
+    for ii, a in enumerate(atoms_first):
+        dist = np.linalg.norm(a.position-atoms_last.get_positions(), axis=1)
+        dist[[not jj for jj in atoms_last.symbols == a.symbol]] = np.inf
+        dist_matrix[ii,:] = dist
+        dist_argmin[ii] = np.argmin(dist)
+
+    # If each atom in atoms_first has an unique match in atoms_last,
+    # we found the indices to sort atoms_last. Otherwise, we have to analyze
+    # the unassigned atoms (the ones that have a shared match atom).
+    uniques, count = np.unique(dist_argmin, return_counts=True)
+    if len(uniques) < n_atoms:
+        # We set to infinite the distances with the atoms already assigned.
+        matches = [int(ii) for ii in uniques[count == 1]]
+        dist_matrix[:,matches] = np.inf
+        unassigned_mask = np.isin(dist_argmin, uniques[count > 1])
+        unassigned_atoms = np.arange(n_atoms)[unassigned_mask]
+        while len(unassigned_atoms) > 0:
+            # We get the atom closer to its match between all the
+            # unassigned atoms, and we assign it to its match, setting the
+            # distance between the match and all the remaining unassigned
+            # atoms equal to infinite.
+            dist_min = []
+            for uu in unassigned_atoms:
+                dist_min += [np.min(dist_matrix[uu,:])]
+            index_new = np.argmin(dist_min)
+            assigned_new = unassigned_atoms[index_new]
+            unassigned_atoms = np.delete(unassigned_atoms, index_new)
+            match_new = int(dist_argmin[assigned_new])
+            dist_matrix[:,match_new] = np.inf
+            for uu in unassigned_atoms:
+                dist_argmin[uu] = np.argmin(dist_matrix[uu,:])
+
+    atoms_last = atoms_last[[int(ii) for ii in dist_argmin]]
+
+    return atoms_first, atoms_last
 
 ################################################################################
 # END
