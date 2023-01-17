@@ -211,7 +211,7 @@ def read_axsf(filename):
 # READ VIB ENERGIES
 ################################################################################
 
-def read_vib_energies(filename = 'log.txt', imaginary = False):
+def read_vib_energies(filename = 'vib.log', imaginary = False):
 
     vib_energies = []
     fileobj = open(filename, 'rU')
