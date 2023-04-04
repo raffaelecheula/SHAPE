@@ -47,7 +47,7 @@ mol      = mole = kilomole/kilo
 
 Angstrom   = Ang = 1e-10*meter
 inch       = 0.0254*meter
-litre      = 1e-03*meter**3
+litre      = liter = 1e-03*meter**3
 minute     = 60*second
 hour       = 3600*second
 Hertz      = Hz = 1/second
