@@ -1092,12 +1092,13 @@ def get_pdos_vect(atoms, e_fermi, filename = 'projwfc.pwo'):
 # GET FEATURES BANDS
 ################################################################################
 
-def get_features_bands(atoms, 
-                       energy,
-                       pdos_vect,
-                       delta_e     = 0.1, 
-                       save_pickle = True,
-                       ):
+def get_features_bands(
+    atoms, 
+    energy,
+    pdos_vect,
+    delta_e     = 0.1, 
+    save_pickle = True,
+):
 
     i_zero = np.argmin(np.abs(energy))
     i_minus = np.argmin(np.abs(energy+delta_e))
@@ -1115,23 +1116,33 @@ def get_features_bands(atoms,
         pdos_sp += pdos_dict['p']
         pdos_sp = pdos_dict['p']
         sp_filling = np.trapz(y = pdos_sp[:i_zero], x = energy[:i_zero])
-        sp_density = (np.sum(pdos_sp[i_minus:i_plus]) /
-                      len(pdos_sp[i_minus:i_plus]))
+        sp_density = (
+            np.sum(pdos_sp[i_minus:i_plus]) /
+            len(pdos_sp[i_minus:i_plus])
+        )
         
         if 'd' in pdos_dict:
             pdos_d = pdos_dict['d']
             d_filling = np.trapz(y = pdos_d[:i_zero], x = energy[:i_zero])
-            d_density = (np.sum(pdos_d[i_minus:i_plus]) / 
-                         len(pdos_d[i_minus:i_plus]))
+            d_density = (
+                np.sum(pdos_d[i_minus:i_plus]) / 
+                len(pdos_d[i_minus:i_plus])
+            )
             d_centre = np.trapz(pdos_d*energy, energy)/np.trapz(pdos_d, energy)
-            d_mom_2 = (np.trapz(pdos_d*np.power(energy-d_centre,2), energy) / 
-                       np.trapz(pdos_d, energy))
+            d_mom_2 = (
+                np.trapz(pdos_d*np.power(energy-d_centre,2), energy) / 
+                np.trapz(pdos_d, energy)
+            )
             d_width = np.sqrt(d_mom_2)
-            d_mom_3 = (np.trapz(pdos_d*np.power(energy-d_centre,3), energy) / 
-                       np.trapz(pdos_d, energy))
+            d_mom_3 = (
+                np.trapz(pdos_d*np.power(energy-d_centre,3), energy) / 
+                np.trapz(pdos_d, energy)
+            )
             d_skewness = d_mom_3/np.power(d_width,3)
-            d_mom_4 = (np.trapz(pdos_d*np.power(energy-d_centre,4), energy) / 
-                       np.trapz(pdos_d, energy))
+            d_mom_4 = (
+                np.trapz(pdos_d*np.power(energy-d_centre,4), energy) / 
+                np.trapz(pdos_d, energy)
+            )
             d_kurtosis = d_mom_4/np.power(d_width,4)
         else:
             d_filling  = np.nan
@@ -1219,99 +1230,6 @@ def assign_init_charges(atoms, pw_data, init_charges_dict):
     return pw_data
 
 ################################################################################
-# CREATE EOS INPUTS
-################################################################################
-
-"""
-def create_eos_inputs(atoms, delta_x, npoints, run_cmd = None):
-
-    cell_zero = atoms.get_cell()
-    x = 1.-delta_x
-    for i in range(npoints):
-    
-        dirname = 'volumes_{:02d}'.format(i)
-        try: os.mkdir(dirname)
-        except: pass
-    
-        os.chdir(dirname)
-        v = x**(1./3.)
-        atoms.set_cell(v*cell_zero, scale_atoms = True)
-        calc = atoms.get_calculator()
-        calc.write_input(atoms)
-        x += (2.*delta_x)/(npoints-1)
-        if run_cmd is not None:
-            os.system(run_cmd)
-        os.chdir('..')
-"""
-
-################################################################################
-# READ EOS OUTPUTS
-################################################################################
-
-"""
-def read_eos_outputs(npoints, filename = 'pw.pwo', get_cells = False):
-
-    volumes  = []
-    energies = []
-    cells    = []
-    
-    for i in range(npoints):
-    
-        dirname = 'volumes_{:02d}'.format(i)
-    
-        os.chdir(dirname)
-        atoms = read_qe_out(filename)
-        cells.append(atoms.cell)
-        volumes.append(atoms.get_volume())
-        energies.append(atoms.potential_energy)
-        os.chdir('..')
-
-    with open('volumes_energies.txt', 'w+') as f:
-        f.write('volumes     energies\n')
-        for i in range(len(volumes)):
-            f.write('{0:10.7f}  {1:14.7f}\n'.format(volumes[i], energies[i]))
-
-    if get_cells is True:
-        return volumes, energies, cells
-    else:
-        return volumes, energies
-"""
-
-################################################################################
-# REORDER NEB IMAGES
-################################################################################
-
-"""
-def reorder_neb_images(first, last):
-
-    coupled = cp.deepcopy(last)
-    spared = [a for a in last]
-    
-    del coupled [range(len(coupled))]
-    
-    for a in first:
-        distances = [10.]*len(last)
-        for b in [ b for b in last if b.symbol == a.symbol ]:
-            distances[b.index] = np.linalg.norm(b.position-a.position)
-        if np.min(distances) > 0.5:
-            first += first.pop(i = a.index)
-    
-    for a in first:
-        distances = [10.]*len(last)
-        for b in [ b for b in last if b.symbol == a.symbol ]:
-            distances[b.index] = np.linalg.norm(b.position-a.position)
-        if np.min(distances) < 0.5:
-            index = np.argmin(distances)
-            coupled += last[index]
-            spared[index] = None
-    
-    spared = Atoms([a for a in spared if a is not None])
-    last = coupled+spared
-
-    return first, last
-"""
-
-################################################################################
 # GET NUMBER OF ELECTRONS
 ################################################################################
 
@@ -1353,10 +1271,12 @@ def write_qe_input_block(fileobj, block_name, block_data, col = 23):
 def write_dos_input(dos_data, filename = 'dos.pwi', col = 23):
 
     with open(filename, 'w+') as fileobj:
-        write_qe_input_block(fileobj    = fileobj   ,
-                             block_name = 'DOS'     ,
-                             block_data = dos_data  ,
-                             col        = col       )
+        write_qe_input_block(
+            fileobj    = fileobj,
+            block_name = 'DOS',
+            block_data = dos_data,
+            col        = col,
+        )
 
 ################################################################################
 # WRITE PP INPUT
@@ -1365,16 +1285,18 @@ def write_dos_input(dos_data, filename = 'dos.pwi', col = 23):
 def write_pp_input(pp_data, plot_data, filename = 'pp.pwi', col = 23):
 
     with open(filename, 'w+') as fileobj:
-    
-        write_qe_input_block(fileobj    = fileobj   ,
-                             block_name = 'INPUTPP' ,
-                             block_data = pp_data   ,
-                             col        = col       )
-
-        write_qe_input_block(fileobj    = fileobj   ,
-                             block_name = 'PLOT'    ,
-                             block_data = plot_data ,
-                             col        = col       )
+        write_qe_input_block(
+            fileobj    = fileobj,
+            block_name = 'INPUTPP',
+            block_data = pp_data,
+            col        = col,
+        )
+        write_qe_input_block(
+            fileobj    = fileobj,
+            block_name = 'PLOT',
+            block_data = plot_data,
+            col        = col,
+        )
 
 ################################################################################
 # WRITE PROJWFC INPUT
@@ -1383,10 +1305,12 @@ def write_pp_input(pp_data, plot_data, filename = 'pp.pwi', col = 23):
 def write_projwfc_input(proj_data, filename = 'projwfc.pwi', col = 23):
 
     with open(filename, 'w+') as fileobj:
-        write_qe_input_block(fileobj    = fileobj   ,
-                             block_name = 'PROJWFC' ,
-                             block_data = proj_data ,
-                             col        = col       )
+        write_qe_input_block(
+            fileobj    = fileobj,
+            block_name = 'PROJWFC',
+            block_data = proj_data,
+            col        = col,
+        )
 
 ################################################################################
 # WRITE DOS INPUT
