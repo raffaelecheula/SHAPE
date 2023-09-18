@@ -3,6 +3,7 @@
 ################################################################################
 
 import pickle
+import yaml
 import numpy as np
 from math import sin, pi, sqrt
 from ase import Atom, Atoms
@@ -354,6 +355,25 @@ def write_dimer_pickle(atoms, vector, calc, eigenmodes = None,
     }
     with open(filename, 'wb') as fileobj:
         pickle.dump(param_dict, fileobj)
+
+################################################################################
+# WRITE DIMER YAML
+################################################################################
+
+def write_dimer_yaml(atoms, vector, calc, eigenmodes = None, 
+                     bond_indices = None, filename = 'dimer.yaml'):
+
+    param_dict = {
+        'atoms'        : atoms,
+        'eigenmodes'   : eigenmodes,
+        'vector'       : vector,
+        'input_data'   : calc.parameters.input_data,
+        'kpts'         : calc.parameters.kpts,
+        'koffset'      : calc.parameters.koffset,
+        'bond_indices' : bond_indices,
+    }
+    with open(filename, 'w') as fileobj:
+        yaml.dump(param_dict, fileobj)
 
 ################################################################################
 # SWAP ATOMS

@@ -1112,8 +1112,8 @@ def get_features_bands(atoms,
                 pdos_dict[orbital] = np.sum(pdos_dict[orbital], axis = 1)
         
         pdos_sp = pdos_dict['s']
-        pdos_sp += pdos_dict['p']
-        pdos_sp = pdos_dict['p']
+        if 'p' in pdos_dict:
+            pdos_sp += pdos_dict['p']
         sp_filling = np.trapz(y = pdos_sp[:i_zero], x = energy[:i_zero])
         sp_density = (np.sum(pdos_sp[i_minus:i_plus]) /
                       len(pdos_sp[i_minus:i_plus]))
