@@ -3,3 +3,4 @@ numpy
 scipy
 matplotlib
 future
+cantera==2.5.1

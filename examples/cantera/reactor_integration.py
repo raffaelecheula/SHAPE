@@ -105,7 +105,7 @@ Degree of rate control (DRC)
 
 DRC       = True
 DRC_pts   = 1
-DRC_thold = 0.05
+DRC_thold = 0.01
 
 """"
 Apparent activation energy (Eapp).
@@ -351,8 +351,7 @@ colors = {'100': 'r'     ,
           '110': 'orange',
           '111': 'b'     ,
           '311': 'm'     ,
-          '331': 'g'     ,
-          'int': 'black' }
+          '331': 'g'     }
 
 colors_dict = {}
 custom_colors = {}
@@ -638,10 +637,6 @@ for i in range(len(miller_list)):
     area = cstr_cat_volume*spec_area
     surf_list[i].area = area
 
-if site_names[-1] == 'int':
-    area = surf_list[2].area/10.                                                # CALCULATE PERIMETER
-    surf_list[-1].area = area
-
 ################################################################################
 # CALCULATE INITIAL KINETICS
 ################################################################################
@@ -766,7 +761,7 @@ if plot_wulff is True:
 
 wulff_frames = []
 
-extra = ['z', 'cat_areas', 'ads_coverages']
+extra = ['z'] #, 'cat_areas', 'ads_coverages']
 solution = ct.SolutionArray(gas, extra = extra)
 
 for n in range(n_cstr):
@@ -821,11 +816,6 @@ for n in range(n_cstr):
         area = cstr_cat_volume*spec_area
         surf_list[i].area = area
         cat_areas_vectors[n,i] = area
-
-    if site_names[-1] == 'int':
-        area = surf_list[2].area/10.                                            # CALCULATE PERIMETER
-        surf_list[-1].area = area
-        cat_areas_vectors[n,-1] = area
 
     """
     Store information of the catalyst morphology and composition of gas
@@ -1085,13 +1075,15 @@ area_spec_dict = {}
 
 for i in range(len(surf_list)):
 
-    area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+    #area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+    area = cat_areas_vectors[index][i]*cstr.volume/cstr_volume
 
     phase = active_phases[i]
 
     surf_list[i].area = area
 
-    cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+    #cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+    cat.coverages = ads_coverages_matrices[index][i,:cat.n_species]
     
     area_spec_dict[phase] = area/cstr.volume
 
@@ -1212,6 +1204,8 @@ for j in range(len(ads_names)):
 
         print('{:7.4f}'.format(cove_ave_dict[spec]), end = ' ')
 
+"""
+
 print('\n\n PUNCTUAL REACTION RATES')
 
 reac_dict = {}
@@ -1276,6 +1270,8 @@ print('\nTotal production of {} \n'.format(main_product))
 
 print('Rtot = {:+13.4e} kmol/m^3/s'.format(prod_sum_main))
 
+"""
+
 print('\n ADSORPTION EQUILIBRIUM CONSTANTS')
 
 for i in range(len(cat_list)):
@@ -1295,6 +1291,8 @@ for i in range(len(cat_list)):
 
     print('\nKeq CO Rh({0}) = {1:.4e} 1/atm'.format(site, Keq_CO))
     print('Keq H2 Rh({0}) = {1:.4e} 1/atm'.format(site, Keq_H2))
+
+"""
 
 if plot_rates is True:
 
@@ -1417,6 +1415,8 @@ if print_outputs is True:
     print('Prod_abs_total  {0:9.3e}'.format(prod_sum_main), file = f)
 
     f.close()
+
+"""
 
 ################################################################################
 # REACTION PATH ANALYSIS
@@ -1988,7 +1988,8 @@ if DRC is True:
 
         for i in range(len(surf_list)):
 
-            area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+            #area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+            area = cat_areas_vectors[index][i]*cstr.volume/cstr_volume
 
             surf_list[i].area = area
 
@@ -1996,7 +1997,8 @@ if DRC is True:
             TS = TS_list[i]
             site = site_names[i]
 
-            cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+            #cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+            cat.coverages = ads_coverages_matrices[index][i,:cat.n_species]
 
             if update_kin is True:
 
@@ -2158,13 +2160,15 @@ if Eapp is True:
 
     for i in range(len(surf_list)):
 
-        area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+        #area = solution.cat_areas[index][i]*cstr.volume/cstr_volume
+        area = cat_areas_vectors[index][i]*cstr.volume/cstr_volume
 
         phase = active_phases[i]
 
         surf_list[i].area = area
 
-        cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+        #cat.coverages = solution.ads_coverages[index][i,:cat.n_species]
+        cat.coverages = ads_coverages_matrices[index][i,:cat.n_species]
         
         area_spec_dict[phase] = area/cstr.volume
     
